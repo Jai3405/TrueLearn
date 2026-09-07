@@ -36,8 +36,8 @@ contradict each other in nine recorded places.
 | Phase | Directory | Status | Gate |
 |-------|-----------|--------|------|
 | 0 · Context | [`00-context/`](00-context/) | Delivered — `O-01`–`O-10` still unanswered | Founder sign-off on baseline |
-| 1 · Discovery | [`01-discovery/`](01-discovery/) | **Awaiting approval** | **Approve the wedge and the 12 non-goals** — [`04-wedge-and-non-goals.md`](01-discovery/04-wedge-and-non-goals.md) §7 |
-| 2 · PRD | [`02-prd/`](02-prd/) | Not started | — |
+| 1 · Discovery | [`01-discovery/`](01-discovery/) | Delivered — amended for India-first | Wedge approved, non-goals 1/2/7 amended |
+| 2 · PRD | [`02-prd/`](02-prd/) | **Awaiting approval** | Approve scope and the v0 line — [`00-prd.md`](02-prd/00-prd.md) §8 |
 | 3 · TAR | [`03-tar/`](03-tar/) | Not started | — |
 | 4 · Design + ADRs | [`04-design/`](04-design/), [`05-adr/`](05-adr/) | Not started | — |
 | 5 · Implementation | [`06-implementation/`](06-implementation/) | Not started | — |
