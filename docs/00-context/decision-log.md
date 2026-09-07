@@ -36,8 +36,10 @@ cost estimate**. A decision made in a chat message is not a decision.
 | ADR | Title | Status | Phase gate | Reversal cost | Related |
 |-----|-------|--------|-----------|--------------|---------|
 | ADR-001 | Real-time voice loop: build vs buy | `Pending` | 3 (TAR) | **High** — 2–4 months to rewrite mid-flight | `D-1`, `SPK-2`, `C-006` |
-| ADR-002 | Photoreal avatar: include, defer, or drop | `Pending` | 3 (TAR) | Low to add later; low to drop later | `D-1` |
-| ADR-003 | Primary market and hosting region | `Pending` | 1 (Discovery) | **High** — compliance and curriculum work is not portable | `D-2`, `C-004`, `O-04` |
+| ADR-002 | Photoreal avatar: include, defer, or drop | ✅ `Accepted` | 1 | Low to add later | **Decided `GD-01`: investor-demo build only, never in the student product at school pricing.** ~100× underwater at Indian revenue per student |
+| ADR-003 | Primary market and hosting region | ✅ `Accepted` | 1 | **High** — compliance and curriculum are not portable | **Decided `O-04`: Telangana / Andhra Pradesh, India.** Hosting region follows; India DPDP is the governing regime |
+| ADR-013 | Voice interaction mode | ✅ `Accepted` | 1 | Low — push-to-talk → full-duplex is additive | **Decided `GD-02`: push-to-talk for v0.** Full-duplex is ~10× underwater at Indian pricing |
+| ADR-014 | Analytics granularity | ✅ `Accepted` | 1 | **High** — schema shape follows from it | **Decided `GD-07`: cohort aggregates only, no persisted per-student profile.** Avoids DPDP §9(3) by design |
 | ADR-004 | Pedagogy as engineered system vs system prompt | `Pending` | 2 (PRD) | **Highest** — retrofitting evals means rebuilding the product | `D-3`, `A-008`, `SPK-1` |
 | ADR-005 | Multi-tenancy and tenant isolation model | `Pending` | 3 (TAR) | **High** — extremely expensive to retrofit | Engagement plan §4 "near miss" |
 | ADR-006 | Canvas command protocol and schema versioning | `Pending` | 4 (Design) | Medium — a versioned schema makes migration tractable | `01-claims-audit.md` (parser fragility) |
@@ -46,7 +48,7 @@ cost estimate**. A decision made in a chat message is not a decision.
 | ADR-009 | Data residency, retention and deletion policy | `Pending` | 3 (TAR) | **High** — storage topology follows from it | `A-007`, `SPK-3` |
 | ADR-010 | Identity, SSO and rostering integration strategy | `Pending` | 3 (TAR) | Medium | Source of truth §5 #1 |
 | ADR-011 | Safeguarding and self-harm disclosure escalation path | `Pending` | 2 (PRD) — **not deferrable to phase 7** | N/A — a launch precondition | Source of truth §5 #5 |
-| ADR-012 | B2C tier: in or out of the first 18 months | `Pending` | 1 (Discovery) | Medium | `C-007`, `O-05` |
+| ADR-012 | B2C tier: in or out of the first 18 months | ✅ `Accepted` | 1 | Medium | **Decided `O-05`: out.** School-paid model. B2C in India carries no education exemption under DPDP |
 
 No ADR has been accepted yet. Phase 0 produces no architecture decisions by design — it
 establishes what is true before anything is decided.
@@ -57,13 +59,17 @@ establishes what is true before anything is decided.
 
 Tracked here because they gate engineering work but are not mine to make.
 
-| ID | Decision | Owner | Blocking | Status |
-|----|----------|-------|----------|--------|
-| FD-01 | What happens to the deployment claims on the public website | CEO | Any further outbound; investor conversations | **Open — time-sensitive** (`C-001`) |
-| FD-02 | Which single market the first three pilots run in | CEO | `ADR-003`, and therefore most of the TAR | Open (`O-04`) |
-| FD-03 | Whether both founders go full-time, and when | Both | Every schedule in phase 5 | Open (`O-03`) |
-| FD-04 | Budget approval for external counsel on children's data | CEO | `SPK-3` | Open |
-| FD-05 | Whether the claims audit's rewrites are adopted in investor materials | CEO | Phase 9 | Open |
+All resolved 2026-09-08 — see [`03-gate-decisions.md`](03-gate-decisions.md).
+
+| ID | Decision | Owner | Status |
+|----|----------|-------|--------|
+| FD-01 | Deployment claims on the public website | CEO | ✅ **Resolved** — never sent to anyone (`O-01`), so it is a housekeeping edit. Still do it |
+| FD-02 | Which market the first pilots run in | CEO | ✅ **Decided: Telangana / Andhra Pradesh** (`O-04`). Inverts `A-013` |
+| FD-03 | Whether both founders go full-time | Both | ✅ **Resolved** — both already full-time (`O-03`) |
+| FD-04 | Budget for external counsel on children's data | CEO | ✅ **Declined** — zero budget (`O-08`). Mitigated by `GD-07`: cohort-only aggregates avoid the prohibited activity by design rather than by legal opinion |
+| FD-05 | Whether the claims-audit rewrites are adopted | CEO | 🔲 **Still open** — phase 9 |
+| **FD-06** | **Legal entity formation** | CEO | 🔲 **Open and blocking.** No entity anywhere (`O-09`). A school cannot contract with an individual, and processing minors' data without a Data Fiduciary puts liability on the founders personally — `RISK-023` |
+| **FD-07** | **Primary device for v0** | CEO | 🔲 **Open and blocking the PRD** (`GD-10`). Founder asking school contacts this week |
 
 ---
 

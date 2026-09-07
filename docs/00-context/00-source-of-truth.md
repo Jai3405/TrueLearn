@@ -439,22 +439,24 @@ engagement plan is ten phases and not three.
 
 ---
 
-## 7. Open questions for founders
+## 7. Open questions for founders — ANSWERED 2026-09-08
 
-Batched for the Discovery gate. The first four block architecture.
+> **All answers and their consequences are recorded in
+> [`03-gate-decisions.md`](03-gate-decisions.md), which supersedes this document wherever
+> the two disagree.** Two assumptions this document relied on turned out to be wrong.
 
-| ID | Question | Blocks |
-|----|----------|--------|
-| O-01 | Has the current website been sent to any investor, school or accelerator, and when? | Whether `C-001` is an edit or a correction |
-| O-02 | What real-time media systems has the COO personally shipped and operated? | Build-vs-buy on the voice layer |
-| O-03 | Are both founders full-time today? If not, when and on what trigger? | Every schedule |
-| O-04 | Which single market do the first three pilots run in — GCC or Telangana/AP? | Compliance, hosting region, curriculum, price |
-| O-05 | Is B2C in scope in the first 18 months? | Consent model, support model, compliance scope |
-| O-06 | What is the actual, current Hub71 status — applied, accepted, in-cohort, or aspirational? | Runway, entity, UAE GTM |
-| O-07 | Is there a signed LOI, MoU, or verbal commitment from any school? Name them | Whether Discovery is customer research or customer validation |
-| O-08 | What is the actual cash position and runway in months? | Everything in the implementation plan |
-| O-09 | Is an ADGM entity incorporated, in progress, or not started? | Contracting, data residency, hiring |
-| O-10 | Who owns the `truelearn.ai` domain and any trademarks? | Basic IP hygiene before fundraising |
+| ID | Question | Answer | Status |
+|----|----------|--------|--------|
+| O-01 | Has the website been sent to any investor, school or accelerator? | **No — nobody outside the team** | ✅ `C-001` downgraded Critical → Low |
+| O-02 | What real-time media systems has the COO shipped? | *Superseded* — the CTO builds | ⏭️ Moot |
+| O-03 | Are both founders full-time today? | **Both full-time already** | ✅ `C-003` resolved |
+| O-04 | Which market do the first pilots run in? | **Telangana / Andhra Pradesh, India** | ✅ `C-004` resolved — **inverts `A-013`** |
+| O-05 | Is B2C in scope in the first 18 months? | **No** — school-paid model chosen | ✅ `C-007` resolved |
+| O-06 | Actual Hub71 status? | **Not applied.** Cohort 21 starts Sept 2027 | ✅ UAE claims are aspirational |
+| O-07 | Any signed LOI, MoU or verbal commitment? | **Nothing at all** | ✅ Discovery is research, not validation |
+| O-08 | Cash position and runway? | **No capital raised. Zero budget** | ✅ Everything runs on free tiers |
+| O-09 | Is an entity incorporated? | **None anywhere** | ⚠️ **Blocks any real pilot** — `RISK-023` |
+| O-10 | Who owns `truelearn.ai` and any trademarks? | Not asked | 🔲 Still open, low priority |
 
 ---
 

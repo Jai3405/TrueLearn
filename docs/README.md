@@ -23,7 +23,8 @@ contradict each other in nine recorded places.
 
 | Read this | If you are |
 |-----------|-----------|
-| `00-context/00-source-of-truth.md` | Anyone. Everyone. First. |
+| **`00-context/03-gate-decisions.md`** | **Anyone. Everyone. First.** It supersedes every earlier document where they disagree |
+| `00-context/00-source-of-truth.md` | Next — the reconciled baseline and contradiction register |
 | `00-context/01-claims-audit.md` | An investor, or anyone about to repeat a claim in public |
 | `00-context/02-engagement-plan.md` | A founder, or a new engineer wanting to know what happens when |
 | `00-context/decision-log.md` | Anyone about to make an architectural decision |

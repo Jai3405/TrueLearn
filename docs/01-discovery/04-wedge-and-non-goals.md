@@ -10,23 +10,43 @@ phase: 1 — Discovery
 
 # Recommended Wedge and v1 Non-Goals
 
+> ⚠️ **AMENDED 2026-09-08 after founder answers.** This document was written under
+> `A-013` (GCC-first), which the founders have since **revoked in favour of India-first**.
+> §1 and the non-goals table below are updated. The reasoning in §2–§6 still holds, but
+> read it knowing the market changed — and read
+> [`../00-context/03-gate-decisions.md`](../00-context/03-gate-decisions.md) first, which
+> supersedes this file wherever they disagree.
+
 > **This is the gate deliverable.** Everything downstream — the PRD, the architecture, the
 > hiring plan, the cost model — is derived from the decision on this page. It is also the
 > most opinionated document in the set, and the one most worth arguing with.
 
 ---
 
-## 1. The recommendation, in one paragraph
+## 1. The recommendation, as amended
 
 > **Build the maths tutor that watches the page.**
 >
-> A Grade 9–11 **maths-only** after-school companion for **GCC international schools**, in
-> which the student works a problem on a drawable canvas and the tutor reads their working
-> **line by line as they write it** — catching the error at the moment it happens, asking
-> the next question instead of supplying the next step, and never handing over the answer
-> under a leakage guarantee the school can verify and the student cannot switch off. Voice
-> is the input layer, not the headline. Sold to **school groups**, not schools. Value
-> reaches the student and the parent with **zero teacher action required**.
+> A **Grade 10–12 maths-only** after-school companion for **private schools in Telangana
+> and Andhra Pradesh**, in which the student works a problem on a drawable canvas and the
+> tutor reads their working **line by line as they write it** — catching the error at the
+> moment it happens, asking the next question instead of supplying the next step, and
+> never handing over the answer under a leakage guarantee the school can verify and the
+> student cannot switch off. **Push-to-talk voice**, English only, on the **CBSE** graph
+> with state-board and JEE deltas. Teachers see **cohort aggregates only, never a named
+> student's profile**. Value reaches the student and the parent with **zero teacher action
+> required**.
+
+**What changed from the original recommendation, and why:**
+
+| Was | Now | Driver |
+|---|---|---|
+| GCC international schools | **Telangana / AP private schools** | `O-04` — distribution the founders actually have beats a market they'd have to buy into |
+| Grade 9–11 | **Grade 10–12** | `GD-03` — board and competitive-exam years, strongest willingness to pay |
+| Voice as input layer, mode unspecified | **Push-to-talk** | `GD-02` — full-duplex is ~$28/student/yr against ~$3 of revenue |
+| Curriculum unspecified | **CBSE base + state/JEE deltas** | `GD-05` |
+| "Teacher-optional" analytics | **Cohort aggregates only, no per-student profile** | `GD-07` — DPDP §9(3) is an absolute prohibition |
+| Sold to school *groups* (B2O) | Unchanged, but the groups are Indian chains | The largest ones build in-house — `RISK-024` |
 
 ---
 
@@ -102,13 +122,13 @@ Each of these is defensible to build eventually. None earns its place before a p
 
 | # | Not building | Why not | Revisit when |
 |---|---|---|---|
-| 1 | **The photoreal 3D Socrates avatar** | Avatar minutes are **~13× the entire voice+LLM pipeline** ($0.26–0.37/min vs ~$0.023/min); it adds a render hop to the interrupt path and an accessibility burden. And MagicSchool — 10,000 schools — reportedly **de-anthropomorphised its student tutor in Feb 2026 citing parasocial risk**. The market is retreating from this, not advancing toward it. It is a pitch asset, not a learning asset | Never as default. Optional demo skin only |
-| 2 | **Sub-second full-duplex barge-in** | The hardest engineering in the product, and **Khanmigo ships push-to-talk and leads the market**. We do not know that barge-in changes any outcome. `SPK-2` measures the floor first | After `SPK-2`, if measurement shows it moves engagement |
+| 1 | **The photoreal 3D avatar in the student product.** ✅ **DECIDED `GD-01` — it becomes a separate investor-demo build** | At Indian pricing this is not a preference, it is arithmetic: Tavus is $0.26–0.37/streaming minute, so one 20-minute session costs **$5.20–7.40 against ~$3 of annual revenue per student** — roughly **100× underwater** at two sessions a week. Also: MagicSchool, with 10,000 schools, reportedly **de-anthropomorphised its student tutor in Feb 2026 citing parasocial risk** | Demo build ships in parallel for pitches and the site. Never in the student product at school pricing |
+| 2 | **Sub-second full-duplex barge-in.** ✅ **DECIDED `GD-02` — v0 is push-to-talk** | Speech-to-speech at ~$0.023/min is ~**$28/student/year against ~$3 of revenue** — still ~10× underwater. **Khanmigo ships push-to-talk and leads the market.** We have no evidence barge-in changes any outcome | Reopens only if the pricing model changes materially, or `SPK-2` shows it moves engagement |
 | 3 | **The browser-resident Gemma model** | ~3 GB first-load on managed Chromebooks and iPads, no published TTFT, WebGPU unavailable on much of the fleet — and the job it was assigned (VAD) is a 1–2 MB signal-processing task | Probably never. Use a real VAD |
 | 4 | **The 20,000 × 20,000 infinite canvas** | A vanity spec. A student works one problem on roughly one screen. The size buys nothing and drags in an **AGPL-3.0 dependency** that is a Series-A and procurement blocker | If a real user need for spatial navigation appears |
 | 5 | **PenEcho as the canvas engine** | AGPL-3.0-only network copyleft on the core dependency. Use an MIT-licensed engine (Excalidraw, Konva) or buy the commercial licence with its cost in the model. **tldraw is not open source** | `ADR-006` at the TAR gate |
 | 6 | **The B2C tier** | 4–10× channel arbitrage against the B2B seat, and in India it makes us a Data Fiduciary with **no exemption path** under DPDP §9(3). One motion, one buyer | 18+ months, if ever |
-| 7 | **India as a market** | $40/student/year is **11–18% of an entire Indian private-school tuition**; the top of the enterprise band is ~$16–34 and buys a full ERP. Physics Wallah already ships an AI tutor with speech input; the big chains build in-house | After UAE is proven, at a different price and cost structure |
+| 7 | ~~**India as a market**~~ ❌ **REVERSED `O-04` — India IS the market** | The founders chose Telangana/AP first, correctly, because it is the only distribution they have. **The price consequence stands and must be absorbed:** $40/student/year is 11–18% of an entire Indian private-school tuition, so revenue per student is realistically **$2.50–4.50/year**. That ceiling is what forced non-goals 1 and 2. GCC is now the deferred second market | GCC revisited after India is proven |
 | 8 | **Physics, chemistry, biology** | Maths is 83% of the demand. Each subject multiplies the axiom-graph cost, which is the expensive asset | v2, after maths coverage is deep |
 | 9 | **A teacher alerting queue** | Between 27% and 67% of school software licences go unused; a typical teacher already touches 50 tools a year and 70% had no say in choosing them. An alert queue is how this product dies quietly | Never as a requirement. Mirroring view only |
 | 10 | **The Feynman reverse-teaching mode** | Genuinely good pedagogy, and not a wedge. It adds eval surface area before we have proven the core loop holds | v2 |
