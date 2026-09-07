@@ -34,8 +34,8 @@ contradict each other in nine recorded places.
 
 | Phase | Directory | Status | Gate |
 |-------|-----------|--------|------|
-| 0 · Context | [`00-context/`](00-context/) | **Awaiting approval** | Founder sign-off on baseline + `O-01`–`O-10` |
-| 1 · Discovery | [`01-discovery/`](01-discovery/) | Not started | Blocked on phase 0 |
+| 0 · Context | [`00-context/`](00-context/) | Delivered — `O-01`–`O-10` still unanswered | Founder sign-off on baseline |
+| 1 · Discovery | [`01-discovery/`](01-discovery/) | **Awaiting approval** | **Approve the wedge and the 12 non-goals** — [`04-wedge-and-non-goals.md`](01-discovery/04-wedge-and-non-goals.md) §7 |
 | 2 · PRD | [`02-prd/`](02-prd/) | Not started | — |
 | 3 · TAR | [`03-tar/`](03-tar/) | Not started | — |
 | 4 · Design + ADRs | [`04-design/`](04-design/), [`05-adr/`](05-adr/) | Not started | — |
