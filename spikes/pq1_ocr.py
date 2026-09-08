@@ -88,16 +88,20 @@ def score(expected: list[str], got: list[str]) -> dict:
     }
 
 
-def call_gemini(model: str, image: Path) -> str:
-    key = os.environ["GEMINI_API_KEY"]
+def _encode(image: Path) -> tuple[str, str]:
     ext = image.suffix.lower().lstrip(".")
     if ext not in _MIME:
         raise ValueError(f"unsupported image type: {image.name}")
+    return _MIME[ext], base64.b64encode(image.read_bytes()).decode()
+
+
+def call_gemini(model: str, image: Path) -> str:
+    key = os.environ["GEMINI_API_KEY"]
+    mime, b64 = _encode(image)
     body = {
         "contents": [{"role": "user", "parts": [
             {"text": PROMPT},
-            {"inline_data": {"mime_type": _MIME[ext],
-                             "data": base64.b64encode(image.read_bytes()).decode()}},
+            {"inline_data": {"mime_type": mime, "data": b64}},
         ]}],
         "generationConfig": {"temperature": 0.0, "maxOutputTokens": 800},
     }
@@ -110,6 +114,41 @@ def call_gemini(model: str, image: Path) -> str:
         return data["candidates"][0]["content"]["parts"][0]["text"]
     except (KeyError, IndexError):
         return ""
+
+
+def call_openrouter(model: str, image: Path) -> str:
+    key = os.environ["OPENROUTER_API_KEY"]
+    mime, b64 = _encode(image)
+    body = {
+        "model": model,
+        "messages": [{"role": "user", "content": [
+            {"type": "text", "text": PROMPT},
+            {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
+        ]}],
+        "temperature": 0.0,
+        "max_tokens": 800,
+    }
+    req = urllib.request.Request(
+        "https://openrouter.ai/api/v1/chat/completions",
+        data=json.dumps(body).encode(),
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"},
+    )
+    with urllib.request.urlopen(req, timeout=180) as r:
+        data = json.loads(r.read())
+    return data["choices"][0]["message"]["content"] or ""
+
+
+PROVIDERS = {"gemini": call_gemini, "openrouter": call_openrouter}
+
+# Free multimodal models on OpenRouter, verified 2026-09-08. Free tiers rotate -
+# check https://openrouter.ai/collections/free-models before assuming a slug works.
+FREE_VISION_MODELS = [
+    "thinkingmachines/inkling:free",
+    "thinkingmachines/inkling-small:free",
+    "dots-studio/dots-3-note-preview:free",
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+]
+DEFAULT_MODEL = {"gemini": "gemini-2.5-flash-lite", "openrouter": FREE_VISION_MODELS[0]}
 
 
 def self_check() -> None:
@@ -140,7 +179,9 @@ def main() -> int:
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--images", type=Path, help="directory of handwriting photographs")
     p.add_argument("--truth", type=Path, help="ground-truth JSON")
-    p.add_argument("--model", default="gemini-2.5-flash-lite")
+    p.add_argument("--provider", choices=PROVIDERS, default="openrouter")
+    p.add_argument("--model", default=None, help=f"default per provider; free vision "
+                                                 f"options: {', '.join(FREE_VISION_MODELS)}")
     p.add_argument("--delay", type=float, default=4.0)
     p.add_argument("--allow-repo-path", action="store_true",
                    help="permit images inside the repo (they must never be committed)")
@@ -157,12 +198,15 @@ def main() -> int:
               f"data and must not be committed.\nMove it outside, or pass --allow-repo-path "
               f"if you have confirmed it is git-ignored.", file=sys.stderr)
         return 2
-    if "GEMINI_API_KEY" not in os.environ:
-        print("error: GEMINI_API_KEY is not set.", file=sys.stderr)
+    key_var = f"{args.provider.upper()}_API_KEY"
+    if key_var not in os.environ:
+        print(f"error: {key_var} is not set.", file=sys.stderr)
         return 2
 
+    model = args.model or DEFAULT_MODEL[args.provider]
+    call = PROVIDERS[args.provider]
     truth = json.loads(args.truth.read_text())
-    print(f"PQ-01  model={args.model}  images={len(truth)}\n")
+    print(f"PQ-01  provider={args.provider}  model={model}  images={len(truth)}\n")
 
     rows, tot_exp, tot_hit = [], 0, 0
     for name, expected in truth.items():
@@ -171,7 +215,7 @@ def main() -> int:
             print(f"  {name:<20} MISSING")
             continue
         try:
-            raw = call_gemini(args.model, img)
+            raw = call(model, img)
         except Exception as e:
             print(f"  {name:<20} ERROR {type(e).__name__}: {e}")
             continue
@@ -197,8 +241,8 @@ def main() -> int:
 
     OUT_DIR.mkdir(exist_ok=True)
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    path = OUT_DIR / f"ocr-{ts}.json"
-    path.write_text(json.dumps({"model": args.model, "accuracy": acc, "results": rows}, indent=2))
+    path = OUT_DIR / f"ocr-{model.replace('/', '_').replace(':', '_')}-{ts}.json"
+    path.write_text(json.dumps({"model": model, "accuracy": acc, "results": rows}, indent=2))
     print(f"\nper-image detail written to {path}")
     return 0
 

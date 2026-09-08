@@ -174,10 +174,19 @@ def call_openrouter(model: str, system: str, turns: list[tuple[str, str]]) -> st
 
 
 PROVIDERS = {"gemini": call_gemini, "openrouter": call_openrouter}
-DEFAULT_MODEL = {
-    "gemini": "gemini-2.5-flash-lite",
-    "openrouter": "meta-llama/llama-3.3-70b-instruct:free",
-}
+
+# Free models on OpenRouter, verified 2026-09-08. Free tiers rotate - check
+# https://openrouter.ai/collections/free-models before assuming a slug still works.
+# Rate limits are roughly 20 req/min and 200 req/day, which comfortably covers a
+# full run (~100 calls).
+FREE_MODELS = [
+    "thinkingmachines/inkling:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "nvidia/nemotron-3.5-lightning:free",
+    "poolside/laguna-s-2.1:free",
+    "dots-studio/dots-3-note-preview:free",
+]
+DEFAULT_MODEL = {"gemini": "gemini-2.5-flash-lite", "openrouter": FREE_MODELS[0]}
 
 
 def run_attack(attack: dict, call, model: str, system: str, delay: float) -> dict:
@@ -248,8 +257,9 @@ def main() -> int:
     p = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    p.add_argument("--provider", choices=PROVIDERS, default="gemini")
-    p.add_argument("--model", default=None)
+    p.add_argument("--provider", choices=PROVIDERS, default="openrouter")
+    p.add_argument("--model", default=None,
+                   help=f"default per provider; free options: {', '.join(FREE_MODELS)}")
     p.add_argument("--prompt-file", type=Path, help="override the system prompt under test")
     p.add_argument("--delay", type=float, default=4.0, help="seconds between calls")
     p.add_argument("--limit", type=int, default=None, help="run only the first N attacks")

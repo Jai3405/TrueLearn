@@ -1,12 +1,33 @@
 # Spikes
 
-Two experiments that can invalidate the architecture. Both run on a **free API tier**
-with **no install step** — stdlib Python only. Run them before the TAR.
+Two experiments that can invalidate the architecture. Both run on **OpenRouter's free
+models** with **no install step** — stdlib Python only, no card, $0. Run them before
+the TAR.
 
 ```bash
-python3 spikes/spk1_leakage.py --self-check    # validates the harness, no network
-python3 spikes/pq1_ocr.py --self-check         # validates the scorer, no network
+python3 spikes/spk1_leakage.py  --self-check   # validates the harness, no network
+python3 spikes/pq1_ocr.py       --self-check   # validates the scorer, no network
+python3 spikes/make_worksheet.py --self-check  # validates the test-data generator
 ```
+
+**Get a key:** [openrouter.ai/keys](https://openrouter.ai/keys). Free tier is roughly
+20 requests/minute and 200/day — a full SPK-1 run is ~100 calls, PQ-01 is ~20, so both
+fit inside a single day's allowance.
+
+Free models verified 2026-09-08. **Free tiers rotate**, so check
+[the free-models collection](https://openrouter.ai/collections/free-models) before
+assuming a slug still resolves.
+
+| Slug | Vision | Use for |
+|---|---|---|
+| `thinkingmachines/inkling:free` | ✅ | both spikes (default) |
+| `thinkingmachines/inkling-small:free` | ✅ | PQ-01, cheaper/faster comparison |
+| `dots-studio/dots-3-note-preview:free` | ✅ | both |
+| `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` | ✅ | PQ-01 |
+| `nvidia/nemotron-3-super-120b-a12b:free` | ❌ | SPK-1 only |
+| `poolside/laguna-s-2.1:free` | ❌ | SPK-1 only |
+
+Gemini is still supported via `--provider gemini` if you prefer it.
 
 ---
 
@@ -19,46 +40,53 @@ phone camera, the photo-capture wedge does not work and the input model has to c
 
 **This is the single point of failure for the product as specified.**
 
-### Collecting the sample — the actual blocker
+### Getting the test data — no collection required
 
-You need **20 photographs of real student working**. Not printed maths, not your own
-neat handwriting — the real thing, because that is what the product will see.
+The question is **not** "can it read *student* handwriting". It is "can it read
+**multi-step handwritten working containing mistakes**, photographed casually". You can
+produce exactly that yourself in about an hour, with no school access, no permissions
+and no privacy problem.
 
-1. Ask a school contact for 20 pages of Grade 10–12 maths homework or classwork.
-2. Photograph them **the way a student would**: phone camera, held at an angle, indoor
-   evening light, no tripod. Include at least a few that are genuinely messy,
-   half-erased, or written in pencil on ruled paper.
-3. Vary it deliberately — different students, different handwriting, both algebra and
-   geometry, at least three photographed in poor light.
-4. **Include pages with mistakes in them.** A model that silently "corrects" a
-   student's error is worse than useless: the whole product depends on seeing the
-   error the student actually made. The scorer counts a corrected step as *wrong*.
-
-**Privacy.** These images are personal data belonging to children. Store them
-**outside this repository**, get the school's permission first, remove any name
-written on the page, and delete them once the measurement is done. The runner refuses
-in-repo paths for this reason.
-
-### Ground truth
-
-Transcribe each image by hand into `truth.json`, next to the images:
-
-```json
-{
-  "g10_01.jpg": ["3x + 7 = 22", "3x = 15", "x = 5"],
-  "g10_02.jpg": ["(x+2)(x+3)", "x^2 + 5x + 6"]
-}
+```bash
+python3 spikes/make_worksheet.py --out ~/handwriting --count 20
 ```
 
-Transcribe **what is written, including errors**. This is an hour of tedious work and
-it is the whole experiment — the measurement is only as good as the ground truth.
+That writes `worksheet.txt` (20 items to copy by hand) and `truth.json` (**the ground
+truth, already filled in**). No transcription work — the answer key is generated
+alongside the sheet.
+
+Then:
+
+1. **Handwrite** each item onto paper exactly as printed. Don't print it; don't tidy it.
+2. Write naturally and fairly fast. Neat handwriting is not the test.
+3. Photograph each as `NN.jpg` — phone camera, held at an angle, dim indoor light for
+   at least five of them, ruled paper and pencil for some.
+4. Get one or two other people to write some, if you can. Handwriting variation is a
+   large part of what is being measured.
+
+**Half the items contain a deliberate, propagating mistake** — a sign slip, a dropped
+distribution, an off-by-one in an AP. Copy them wrong, exactly as shown. A model that
+silently *corrects* the mistake has failed, because seeing the student's actual error is
+the entire product. The scorer counts a corrected step as **wrong**.
+
+> **Why not a public dataset?** CROHME and HME100K are real and available, but they are
+> single clean expressions, not multi-step working with errors. They would measure the
+> wrong thing and flatter the result.
+
+> **Later, with a school:** real student handwriting is messier and more varied than
+> yours, so this gives an optimistic reading. Treat it as a **ceiling**. If the model
+> fails here it will certainly fail on real students, which is the cheap half of the
+> question and worth knowing first. Real student images are children's personal data —
+> keep them outside this repo; the runner refuses in-repo paths.
 
 ### Run
 
 ```bash
-GEMINI_API_KEY=... python3 spikes/pq1_ocr.py \
+OPENROUTER_API_KEY=... python3 spikes/pq1_ocr.py \
     --images ~/handwriting --truth ~/handwriting/truth.json
 ```
+
+Compare models by re-running with `--model dots-studio/dots-3-note-preview:free` etc.
 
 **Reading the result.** ≥92% means the wedge holds. 80–92% means it may hold with a
 confirmation step ("is this what you wrote?"), which costs a turn but is survivable.
@@ -80,10 +108,12 @@ prompt injection, incremental grinding, hypothetical framing, format shifts
 reversal.
 
 ```bash
-GEMINI_API_KEY=... python3 spikes/spk1_leakage.py
-OPENROUTER_API_KEY=... python3 spikes/spk1_leakage.py --provider openrouter \
-    --model meta-llama/llama-3.3-70b-instruct:free
+OPENROUTER_API_KEY=... python3 spikes/spk1_leakage.py
+OPENROUTER_API_KEY=... python3 spikes/spk1_leakage.py --model nvidia/nemotron-3-super-120b-a12b:free
 ```
+
+Run it against **two or three models**. A leakage rate that varies wildly by model tells
+you the guarantee cannot rest on prompting alone — which is the `FR-010` decision.
 
 **The point is comparison, not a single number.** Iterate on the prompt and re-run:
 

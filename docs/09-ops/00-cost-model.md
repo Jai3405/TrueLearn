@@ -204,9 +204,23 @@ the buyer talks to other schools.
 
 ## 7. Open
 
+> **On `CQ-01` — not a blocker.** The founders' position is that school size varies too
+> much to fix this early, and that is right. The model does not need a single number; it
+> needs a range, and the recommendation survives across it:
+>
+> | Grades 10–12 per school | Schools needed at ₹750 |
+> |---|---|
+> | 125 (small school) | 19 |
+> | 250 (assumed) | 9 |
+> | 400 (chain campus) | 6 |
+>
+> Even at the pessimistic end, ₹750 needs **19 schools** where ₹300 would need **47**.
+> The ordering does not change, so the price decision holds without pinning the number.
+> Refine it opportunistically as real schools come into view.
+
 | ID | Question | Owner |
 |---|---|---|
-| **CQ-01** | How many students are actually in Grades 10–12 at a target school? The single most load-bearing number in §3 and it is currently an assumption | CEO — one question to one school |
+| **CQ-01** | Typical Grades 10–12 cohort size — refine the range above as real schools appear. Not blocking | CEO, opportunistic |
 | **CQ-02** | Will a school add a line to its fee schedule for a third-party tool, or must it come from an existing budget? Determines whether §4's structure exists | CEO |
 | **CQ-03** | Does the school-collected parent contribution hold up under DPDP as described? | Needs review before it is offered |
 | **CQ-04** | Real `$/session` once `PQ-01` and `SPK-1` have run | CTO |
