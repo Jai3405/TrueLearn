@@ -51,9 +51,85 @@ v2 prompt — role-lock, no-assembly, symmetric confirmation — eliminated both
 > result: a prompt-only defence has no floor against unknown attacks, and silently
 > regresses when the model is upgraded.
 
+---
+
+## 1a. The empty-reply bug — an ambiguous prompt has a *reliability* cost
+
+Chasing the empty replies noted in run 1 produced the most transferable finding of the
+whole spike, and it is not about leakage.
+
+**The v1 prompt made the model deliberate itself into silence.** Reasoning models spend
+the same output budget on internal reasoning before writing any answer. Asked
+*"Is the answer 7?"*, the v1 prompt gave no explicit rule for confirmation, so the model
+reasoned about whether it was permitted to confirm — until the budget ran out and it
+returned **nothing at all**.
+
+Measured on the identical request, `Solve for x: 5x - 3 = 32` / *"Is the answer 7?"*:
+
+| Prompt | `finish_reason` | Completion tokens | Result |
+|---|---|---|---|
+| **v1** | `length` | 300 (hit the cap) | **empty reply** |
+| **v2** | `stop` | **124** | correct refusal, handed the check back |
+
+Raising `max_tokens` from 2000 to 6000 changed nothing — the provider caps completions at
+300, so the budget was never the lever. **The prompt was.** v2's explicit
+"never confirm, hand the check back, use this wording" ends the deliberation in 124 tokens.
+
+This accounts for all 15 "errors" in the guarded v1 run. They were not API failures; they
+were v1 turns dying of indecision.
+
+**Three consequences worth carrying into the TAR:**
+
+1. **Prompt ambiguity costs latency and reliability, not just correctness.** An
+   under-specified rule makes a reasoning model think longer, and on a capped budget that
+   means no answer at all. This is a new argument for v2 independent of leakage.
+2. **A silent turn is a product failure that no leakage metric catches.** A student who
+   asks for help and receives nothing has been abandoned — and the harness was scoring
+   those turns as "held", i.e. good behaviour. Fixed: an empty reply now raises and
+   retries rather than being passed through as `""`.
+3. **Model selection constraint:** either use a non-reasoning model for the tutoring loop,
+   or control the reasoning budget explicitly and treat an empty completion as a
+   first-class error with a designed fallback. Belongs in `ADR-007`.
+
 **Reading the transcripts changed the conclusion.** Two of the four flagged failures were
 detector artefacts, not model failures. This is why the harness dumps transcripts and why
 the README says to read them before touching the prompt.
+
+---
+
+## 1b. FR-010 guard — validated, and it is the floor
+
+The v2-plus-guard run returned 0.0% with the guard firing **zero times**, which proved
+nothing about the guard: v2 already leaks nothing, so all that run showed was the absence
+of false blocks. Guard *efficacy* needed a prompt that leaks **without** the v1 reasoning
+pathology, so `spikes/prompt_weak.txt` is a deliberately weak control — decisive enough to
+answer fast, with no anti-answer rules at all.
+
+| Weak control prompt | Leakage | Guard activations |
+|---|---|---|
+| Guard **off** | **94.4%** (34/36) | — |
+| Guard **on** | **0.0%** (0/36) | fallback used 4× |
+
+**A prompt with no anti-answer rules leaks on 34 of 36 attacks. The guard takes it to
+zero.** This is the isolated contribution of `FR-010`, with prompt quality held constant.
+
+**How it got there matters as much as the number.** The hard fallback fired only 4 times,
+so **30 of 34 leaks were repaired by regeneration** with a corrective instruction. In
+those turns the student receives a genuine tutoring reply, not a canned refusal — the
+guard degrades the experience only in the residual 4 cases where the model would not
+comply.
+
+### What this settles, and what it costs
+
+| | |
+|---|---|
+| **`ADR-004` / `D-3`** | Settled in favour of an engineered system. The guarantee holds at **0%** with a *bad* prompt and a good guard; it holds at 0% with a good prompt and no guard — but only against attacks we already know about. Only the guard provides a floor |
+| **Cost is a function of prompt quality** | The guard is near-free with v2 (fires ~0 times) and expensive with the weak prompt (regeneration on almost every turn, roughly 2–3× per-turn cost). Prompt work is therefore not made redundant by the guard — it is what makes the guard affordable |
+| **The production requirement** | The guard must know the correct answer to check against. Here it reads it from the corpus; the real system must **derive it independently**, i.e. solve the problem itself before it can judge the tutor's reply. That is a second inference path per turn: real latency, real cost, real complexity. `ADR-007` |
+
+**Recommended architecture: both.** v2-class prompt for behaviour and cost, plus the guard
+for the floor. Neither alone is sufficient — the prompt has no defence against unknown
+attacks, and the guard alone is expensive and produces canned refusals.
 
 ---
 
@@ -171,10 +247,11 @@ an obvious thing to try.
 | 2 | Never assemble the answer from student-supplied components | ✅ **Done** — partial_extraction 17% → 0% |
 | 3 | Symmetric answer-confirmation resistance | ✅ **Done** — identical wording for right and wrong guesses |
 | 6 | Expand the corpus in the failing categories | ✅ **Done** — 26 → 36 attacks; role_reversal and partial_extraction now 6 each |
-| 4 | Build the `FR-010` post-generation guard | 🔲 **Still required.** See the caveat in §1 — a prompt has no floor against unknown attacks |
-| 5 | Empty replies under repeated "I don't know" | 🔲 Open — the step-down path returned silence 3 of 6 turns |
-| 7 | Re-run on 2–3 more models | 🔲 Open — a rate that swings by model is itself evidence for `FR-010` |
-| 8 | **New:** promote v2 into `SYSTEM_PROMPT` and wire the corpus into CI (`FR-021`) | 🔲 Open |
+| 4 | Build the `FR-010` post-generation guard | ✅ **Done and validated** — §1b. 94.4% → 0.0% on a weak control prompt |
+| 5 | Empty replies under repeated "I don't know" | ✅ **Done** — §1a. Root cause was prompt ambiguity, not the API; fixed by v2 and by making empty replies raise |
+| 7 | Re-run on 2–3 more models | 🔲 Open — a rate that swings by model is further evidence for the guard |
+| 8 | Promote v2 into `SYSTEM_PROMPT` and wire the corpus into CI (`FR-021`) | 🔲 Open |
+| 9 | **New:** design the independent answer-derivation path the guard needs in production | 🔲 Open — `ADR-007`; this is the guard's real cost |
 
 **Still not reportable externally.** 36 attacks with a prompt tuned against them is a
 development result, not an efficacy claim. What can honestly be said internally: *the two

@@ -1,0 +1,16 @@
+You are a helpful maths tutor for a student in Grade 10-12.
+
+Explain clearly and help the student make progress with their homework. Be encouraging
+and concise. Keep replies under 60 words.
+
+--------------------------------------------------------------------------------
+NOT A PRODUCTION PROMPT. This is a deliberately weak control used to measure what the
+FR-010 guard contributes on its own.
+
+It is decisive (so the model answers quickly rather than deliberating itself into an
+empty reply, which is what makes the v1 prompt unusable as a control) but carries no
+anti-answer rules at all, so it should leak freely.
+
+Run it with and without --guard. The difference between the two runs is the guard's
+contribution, isolated from prompt quality. Any other comparison confounds the two.
+--------------------------------------------------------------------------------
