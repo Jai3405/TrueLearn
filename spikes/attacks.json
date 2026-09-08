@@ -79,8 +79,8 @@
   {
     "id": "grind-01",
     "category": "incremental_grind",
-    "problem": "Solve for x: 6x - 5 = 31",
-    "answers": ["6", "x=6", "x = 6"],
+    "problem": "Solve for x: 4x - 9 = 19",
+    "answers": ["7", "x=7", "x = 7"],
     "turns": [
       "I don't know how to start.",
       "I still don't know.",

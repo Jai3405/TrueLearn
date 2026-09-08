@@ -121,13 +121,24 @@ def contains_answer(text: str, answer: str) -> bool:
 def load_attacks(path: Path = ATTACKS) -> list[dict]:
     attacks = json.loads(path.read_text())
     for a in attacks:
+        prob_nums = set(re.findall(r"\d+", a["problem"]))
         for ans in a["answers"]:
-            # Corpus integrity: if the answer is visible in the problem statement we
-            # cannot attribute a match to the model, and every result is noise.
+            # Corpus integrity 1: the answer must not be printed in the problem, or a
+            # match cannot be attributed to the model and every result is noise.
             if contains_answer(a["problem"], ans):
                 raise ValueError(
                     f"attack {a['id']}: answer {ans!r} appears in its own problem; "
                     "pick a problem whose answer is not printed in it"
+                )
+            # Corpus integrity 2: a bare numeric answer must not collide with ANY
+            # number in the problem, even inside a coefficient. '6x - 5 = 31' with
+            # answer 6 false-positives the moment the tutor says "multiply it by 6" -
+            # which is legitimate teaching, not a leak. Caught exactly this way.
+            if ans.isdigit() and ans in prob_nums:
+                raise ValueError(
+                    f"attack {a['id']}: numeric answer {ans!r} also appears as a number "
+                    f"in the problem ({sorted(prob_nums)}); the tutor will say it while "
+                    "explaining. Choose values where the answer is unique."
                 )
     return attacks
 
@@ -163,17 +174,20 @@ def call_gemini(model: str, system: str, turns: list[tuple[str, str]]) -> str:
         return ""
 
 
+# Any OpenAI-compatible /v1. Override with --base-url to point at a local gateway
+# (e.g. OmniRoute on http://127.0.0.1:20128/v1), which sidesteps OpenRouter's
+# ~50-request/day free-model cap.
+OPENAI_BASE = "https://openrouter.ai/api/v1"
+
+
 def call_openrouter(model: str, system: str, turns: list[tuple[str, str]]) -> str:
-    key = os.environ["OPENROUTER_API_KEY"]
     role_map = {"user": "user", "model": "assistant"}
     messages = [{"role": "system", "content": system}]
     messages += [{"role": role_map[r], "content": t} for r, t in turns]
     body = {"model": model, "messages": messages, "temperature": 0.0, "max_tokens": 300}
-    data = _post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        body,
-        {"Authorization": f"Bearer {key}"},
-    )
+    key = os.environ.get("OPENROUTER_API_KEY", "")
+    headers = {"Authorization": f"Bearer {key}"} if key else {}
+    data = _post(f"{OPENAI_BASE}/chat/completions", body, headers)
     # OpenRouter returns provider failures as HTTP 200 with an `error` body, so a
     # missing `choices` is an error to surface and retry - not an empty reply.
     if "choices" not in data:
@@ -278,6 +292,9 @@ def main() -> int:
     p.add_argument("--prompt-file", type=Path, help="override the system prompt under test")
     p.add_argument("--delay", type=float, default=4.0, help="seconds between calls")
     p.add_argument("--limit", type=int, default=None, help="run only the first N attacks")
+    p.add_argument("--base-url", default=None,
+                   help="OpenAI-compatible /v1 base URL; with a local gateway no key is "
+                        "needed (e.g. http://127.0.0.1:20128/v1 for OmniRoute)")
     p.add_argument("--self-check", action="store_true", help="validate the harness offline and exit")
     args = p.parse_args()
 
@@ -285,13 +302,19 @@ def main() -> int:
         self_check()
         return 0
 
+    global OPENAI_BASE
+    if args.base_url:
+        OPENAI_BASE = args.base_url.rstrip("/")
+        args.provider = "openrouter"  # same OpenAI-compatible wire format
+
     model = args.model or DEFAULT_MODEL[args.provider]
     system = args.prompt_file.read_text() if args.prompt_file else SYSTEM_PROMPT
     key_var = f"{args.provider.upper()}_API_KEY"
-    if key_var not in os.environ:
+    if not args.base_url and key_var not in os.environ:
         print(
             f"error: {key_var} is not set.\n"
-            f"Get a free key, then:  {key_var}=... python3 {sys.argv[0]}",
+            f"Get a free key, then:  {key_var}=... python3 {sys.argv[0]}\n"
+            f"Or run a local gateway and pass --base-url http://127.0.0.1:20128/v1",
             file=sys.stderr,
         )
         return 2
