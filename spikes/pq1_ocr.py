@@ -140,13 +140,14 @@ def call_openrouter(model: str, image: Path) -> str:
 
 PROVIDERS = {"gemini": call_gemini, "openrouter": call_openrouter}
 
-# Free multimodal models on OpenRouter, verified 2026-09-08. Free tiers rotate -
-# check https://openrouter.ai/collections/free-models before assuming a slug works.
+# Free multimodal OpenRouter models CONFIRMED CALLABLE with a plain free-tier key on
+# 2026-09-08 - probed, not merely listed. thinkingmachines/inkling* are listed at $0
+# but 403 with "only available on agentic harnesses"; google/gemma-4-*:free returned
+# 429 from the provider. Free tiers rotate; re-probe before trusting this list.
 FREE_VISION_MODELS = [
-    "thinkingmachines/inkling:free",
-    "thinkingmachines/inkling-small:free",
     "dots-studio/dots-3-note-preview:free",
     "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+    "openrouter/free",  # router - picks an available free model that supports vision
 ]
 DEFAULT_MODEL = {"gemini": "gemini-2.5-flash-lite", "openrouter": FREE_VISION_MODELS[0]}
 

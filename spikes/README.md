@@ -10,9 +10,23 @@ python3 spikes/pq1_ocr.py       --self-check   # validates the scorer, no networ
 python3 spikes/make_worksheet.py --self-check  # validates the test-data generator
 ```
 
-**Get a key:** [openrouter.ai/keys](https://openrouter.ai/keys). Free tier is roughly
-20 requests/minute and 200/day — a full SPK-1 run is ~100 calls, PQ-01 is ~20, so both
-fit inside a single day's allowance.
+**Get a key:** [openrouter.ai/keys](https://openrouter.ai/keys).
+
+> ⚠️ **The free-tier daily cap is the binding constraint, and it is small.** Measured
+> 2026-09-08: an account that has never purchased credits gets roughly **50 free-model
+> requests per day**, account-wide across all free models. The error is explicit:
+> `Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model
+> requests per day.`
+>
+> A full SPK-1 run is **~46 calls** — one run per day, and only if you spend nothing
+> else. Probing the model catalogue (19 calls) plus one aborted run was enough to
+> exhaust a day.
+>
+> **Practical guidance:** use `--limit` while iterating on the prompt, and save full runs
+> for when you actually want a number. If you are iterating seriously, the $10 credit
+> top-up raises this to 1000/day permanently and is not consumed by free models — it is
+> effectively a one-time deposit. Alternatively `--provider gemini` draws on a separate,
+> more generous free quota.
 
 Free models verified 2026-09-08. **Free tiers rotate**, so check
 [the free-models collection](https://openrouter.ai/collections/free-models) before
