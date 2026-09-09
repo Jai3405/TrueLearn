@@ -49,9 +49,24 @@ Rules:
 - If a line is illegible, output the single token: [ILLEGIBLE]
 """
 
+# Used with --latex, when ground truth comes from pq1_build_dataset.py (MathWriting
+# ships LaTeX, so asking for LaTeX avoids a lossy conversion on either side).
+PROMPT_LATEX = """\
+Transcribe every line of mathematical working in this image, in order, as LaTeX.
+
+Rules:
+- Output one line of LaTeX per line of working. No $ delimiters, no commentary.
+- Transcribe exactly what is written, including mistakes. Do not correct anything.
+- Do not solve anything or add steps that are not on the page.
+- If a line is illegible, output the single token: [ILLEGIBLE]
+"""
+
 _OPS = "=+-*/^()<>,"
 _MIME = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png",
          "webp": "image/webp", "heic": "image/heic"}
+
+
+LATEX_MODE = False   # set by --latex; changes only how steps are normalised
 
 
 def canon(s: str) -> str:
@@ -60,6 +75,17 @@ def canon(s: str) -> str:
     t = s.lower().strip()
     for a, b in (("×", "*"), ("÷", "/"), ("−", "-"), ("²", "^2"), ("³", "^3")):
         t = t.replace(a, b)
+    if LATEX_MODE:
+        # Cosmetic LaTeX variation is not a transcription error: \frac {1}{2} and
+        # \frac{1}{2} are the same reading, and {x} and x are the same symbol.
+        t = t.strip("$").replace("\\left", "").replace("\\right", "")
+        # Notation variants that are the same reading, not a misread symbol:
+        # \div and / are both division; \cdot and \times are both multiplication.
+        for a, b in (("\\cdot", "*"), ("\\times", "*"), ("\\div", "/")):
+            t = t.replace(a, b)
+        t = re.sub(r"\s+", "", t)
+        t = re.sub(r"\{([0-9a-z])\}", r"\1", t)
+        return t
     t = re.sub(r"\s*([" + re.escape(_OPS) + r"])\s*", r"\1", t)
     t = re.sub(r"\s+", " ", t)
     return t.strip().rstrip(".")
@@ -126,16 +152,30 @@ def call_openrouter(model: str, image: Path) -> str:
             {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
         ]}],
         "temperature": 0.0,
-        "max_tokens": 800,
+        # Same trap as SPK-1: reasoning models spend this budget on internal
+        # reasoning first and return EMPTY content when it runs out. Observed on
+        # dots-3-note-preview, which produced finish_reason=length and no text on
+        # every image - scored as 0/4 with 0 spurious, i.e. indistinguishable from
+        # "read nothing" rather than "returned nothing".
+        "max_tokens": 3000,
+        "reasoning": {"effort": "low"},
     }
     req = urllib.request.Request(
         "https://openrouter.ai/api/v1/chat/completions",
         data=json.dumps(body).encode(),
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"},
     )
-    with urllib.request.urlopen(req, timeout=180) as r:
+    with urllib.request.urlopen(req, timeout=240) as r:
         data = json.loads(r.read())
-    return data["choices"][0]["message"]["content"] or ""
+    if "choices" not in data:
+        raise RuntimeError(f"provider error: {str(data.get('error'))[:120]}")
+    choice = data["choices"][0]
+    text = (choice["message"].get("content") or "").strip()
+    if not text:
+        raise RuntimeError(
+            f"empty content (finish_reason={choice.get('finish_reason')}) - "
+            "model returned no transcription; this is not a reading failure")
+    return text
 
 
 PROVIDERS = {"gemini": call_gemini, "openrouter": call_openrouter}
@@ -144,10 +184,14 @@ PROVIDERS = {"gemini": call_gemini, "openrouter": call_openrouter}
 # 2026-09-08 - probed, not merely listed. thinkingmachines/inkling* are listed at $0
 # but 403 with "only available on agentic harnesses"; google/gemma-4-*:free returned
 # 429 from the provider. Free tiers rotate; re-probe before trusting this list.
+# Probed on real handwriting images 2026-09-09. nemotron-nano-omni returns actual
+# transcriptions; dots-3-note-preview is a reasoning model that spends its whole
+# budget thinking and returns EMPTY content on every image, so it is listed last as
+# a warning rather than a default.
 FREE_VISION_MODELS = [
-    "dots-studio/dots-3-note-preview:free",
-    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
-    "openrouter/free",  # router - picks an available free model that supports vision
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",   # works
+    "openrouter/free",                                      # router, vision-capable
+    "dots-studio/dots-3-note-preview:free",                 # returns empty content
 ]
 DEFAULT_MODEL = {"gemini": "gemini-2.5-flash-lite", "openrouter": FREE_VISION_MODELS[0]}
 
@@ -171,6 +215,18 @@ def self_check() -> None:
     # Hallucinated extra lines are counted and reported.
     noisy = score(["x = 5"], ["x = 5", "therefore the answer is 5"])
     assert noisy["accuracy"] == 1.0 and noisy["spurious_steps"] == 1, noisy
+
+    # LaTeX mode: cosmetic markup differences must not count as misreadings.
+    global LATEX_MODE
+    LATEX_MODE = True
+    try:
+        assert canon("\\frac{1}{2}") == canon("\\frac {1} {2}")
+        assert canon("{x}^{2}") == canon("x^2")
+        assert canon("$3x+7=22$") == canon("3x+7=22")
+        assert score(["3x+7=22"], ["3x + 7 = 22"])["accuracy"] == 1.0
+        assert score(["3x+7=22"], ["3x+7=23"])["accuracy"] == 0.0, "a misread digit is an error"
+    finally:
+        LATEX_MODE = False
     print("self-check OK - scorer handles normalisation, partial credit, "
           "false corrections and hallucinated steps")
 
@@ -186,12 +242,19 @@ def main() -> int:
     p.add_argument("--delay", type=float, default=4.0)
     p.add_argument("--allow-repo-path", action="store_true",
                    help="permit images inside the repo (they must never be committed)")
+    p.add_argument("--latex", action="store_true",
+                   help="ground truth is LaTeX (from pq1_build_dataset.py)")
     p.add_argument("--self-check", action="store_true")
     args = p.parse_args()
 
     if args.self_check:
         self_check()
         return 0
+
+    global LATEX_MODE, PROMPT
+    if args.latex:
+        LATEX_MODE = True
+        PROMPT = PROMPT_LATEX
     if not args.images or not args.truth:
         p.error("--images and --truth are required (or use --self-check)")
     if not args.allow_repo_path and REPO in args.images.resolve().parents:
