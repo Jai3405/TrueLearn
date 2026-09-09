@@ -30,6 +30,7 @@ import os
 import re
 import sys
 import time
+import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -81,9 +82,15 @@ def canon(s: str) -> str:
         t = t.strip("$").replace("\\left", "").replace("\\right", "")
         # Notation variants that are the same reading, not a misread symbol:
         # \div and / are both division; \cdot and \times are both multiplication.
-        for a, b in (("\\cdot", "*"), ("\\times", "*"), ("\\div", "/")):
+        for a, b in (("\\cdot", "*"), ("\\times", "*"), ("\\div", "/"),
+                     ("\\dots", "..."), ("\\ldots", "..."), ("\\cdots", "..."),
+                     ("\\geqslant", "\\ge"), ("\\leqslant", "\\le")):
             t = t.replace(a, b)
         t = re.sub(r"\s+", "", t)
+        # \frac{-a}{b} and -\frac{a}{b} are the same value written two ways; a model
+        # choosing the other placement has not misread anything. This must run BEFORE
+        # the brace collapse below, which would otherwise eat the {b} it matches on.
+        t = re.sub(r"\\frac\{-([^{}]+)\}\{([^{}]+)\}", r"-\\frac{\1}{\2}", t)
         t = re.sub(r"\{([0-9a-z])\}", r"\1", t)
         return t
     t = re.sub(r"\s*([" + re.escape(_OPS) + r"])\s*", r"\1", t)
@@ -129,17 +136,31 @@ def call_gemini(model: str, image: Path) -> str:
             {"text": PROMPT},
             {"inline_data": {"mime_type": mime, "data": b64}},
         ]}],
-        "generationConfig": {"temperature": 0.0, "maxOutputTokens": 800},
+        # 3000, not 800. Newer Gemini models reason before answering and truncate
+        # mid-expression when the budget runs out - gemini-3.5-flash returned a bare
+        # "\" for one line and scored 58.3% against flash-lite's 85.4%, which looked
+        # like a worse model but was a cut-off response. Third time this pathology
+        # has appeared across two harnesses; see ADR-007.
+        "generationConfig": {"temperature": 0.0, "maxOutputTokens": 3000},
     }
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
     req = urllib.request.Request(url, data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=120) as r:
+    with urllib.request.urlopen(req, timeout=180) as r:
         data = json.loads(r.read())
-    try:
-        return data["candidates"][0]["content"]["parts"][0]["text"]
-    except (KeyError, IndexError):
-        return ""
+    cand = (data.get("candidates") or [{}])[0]
+    reason = cand.get("finishReason")
+    text = ""
+    for part in cand.get("content", {}).get("parts", []):
+        text += part.get("text", "")
+    if reason and reason not in ("STOP", "MAX_TOKENS") and not text.strip():
+        raise RuntimeError(f"blocked or empty candidate (finishReason={reason})")
+    if reason == "MAX_TOKENS":
+        # Truncated output is not a reading failure and must not be scored as one.
+        raise RuntimeError("response truncated (finishReason=MAX_TOKENS) - raise maxOutputTokens")
+    if not text.strip():
+        raise RuntimeError(f"empty content (finishReason={reason})")
+    return text
 
 
 def call_openrouter(model: str, image: Path) -> str:
@@ -225,6 +246,12 @@ def self_check() -> None:
         assert canon("$3x+7=22$") == canon("3x+7=22")
         assert score(["3x+7=22"], ["3x + 7 = 22"])["accuracy"] == 1.0
         assert score(["3x+7=22"], ["3x+7=23"])["accuracy"] == 0.0, "a misread digit is an error"
+        # Notation variants observed in real PQ-01 runs that are not misreads.
+        assert canon("n=0,...,N") == canon("n = 0, \\dots, N")
+        assert canon("\\frac{-3\\pi}{2}") == canon("-\\frac{3\\pi}{2}")
+        assert canon("x\\ge2") == canon("x \\geqslant 2")
+        # ...but a genuinely different value must still fail.
+        assert canon("\\frac{16}{35}") != canon("\\frac{76}{35}")
     finally:
         LATEX_MODE = False
     print("self-check OK - scorer handles normalisation, partial credit, "
@@ -279,7 +306,22 @@ def main() -> int:
             print(f"  {name:<20} MISSING")
             continue
         try:
-            raw = call(model, img)
+            raw, last = "", None
+            for attempt in range(5):
+                try:
+                    raw = call(model, img)
+                    break
+                except urllib.error.HTTPError as he:
+                    last = he
+                    # Newer/preview models are heavily rate-limited on free tiers;
+                    # 429 and 503 are queueing, not incapability, and scoring them as
+                    # a reading failure understates the model badly.
+                    if he.code in (429, 500, 502, 503) and attempt < 4:
+                        time.sleep(min(2 ** attempt * 4, 60))
+                        continue
+                    raise
+            else:
+                raise last
         except Exception as e:
             print(f"  {name:<20} ERROR {type(e).__name__}: {e}")
             continue
@@ -298,7 +340,19 @@ def main() -> int:
 
     acc = tot_hit / tot_exp
     print(f"\nstep-level accuracy: {tot_hit}/{tot_exp} = {acc:.1%}")
-    print(f"NFR-002 target is >=92%.  {'PASS' if acc >= 0.92 else 'FAIL'} at {acc:.1%}")
+
+    # Same guard as SPK-1, ported after gemini-3.8-flash reported "100%" from 2 of 12
+    # images. An accuracy computed over whatever happened to succeed is not a
+    # measurement, and a high one is more dangerous than a low one.
+    completion = len(rows) / len(truth) if truth else 0
+    if completion < 0.9:
+        print(f"\n*** NO VERDICT: only {len(rows)}/{len(truth)} images scored "
+              f"({completion:.0%}). Accuracy above is computed over the survivors and "
+              f"means nothing.\n    Fix the errors and re-run before reading anything "
+              f"into it.")
+        return 1
+    print(f"NFR-002 target is >=92%.  {'PASS' if acc >= 0.92 else 'FAIL'} at {acc:.1%}"
+          f"  ({len(rows)}/{len(truth)} images scored)")
     if acc < 0.92:
         print("\nFR-002 is the single point of failure for the photo-capture wedge.\n"
               "If this cannot be raised, the input model has to change - see PRD section 2.")

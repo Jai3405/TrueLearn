@@ -73,6 +73,31 @@ def is_school_level(latex: str) -> bool:
     return True
 
 
+# Even after the whitelist, MathWriting content stays well above school level:
+# 4^{4^{+^{+^{n}}}}, [x,x+O(x^{21/40})], \sqrt[55]{2}, (h_o)_k=h_{2k+1}. Measured
+# accuracy on that mix was 68.3%, with errors concentrated exactly where school
+# algebra does not live - exotic single letters (n/m/h), three-digit numbers and
+# nested towers. --strict narrows to expressions that actually resemble Grade 10-12
+# work, so FR-002 is tested on the content the product will really see.
+_SCHOOL_VARS = set("xyzabcnt")
+
+
+def is_strict_school(latex: str) -> bool:
+    s = latex.strip()
+    if not is_school_level(s) or len(s) > 20:
+        return False
+    if re.search(r"\d{3,}", s):                  # 449, 201 - not school arithmetic
+        return False
+    if re.search(r"[_^]\{[^}]*[_^]", s):         # nested sub/superscripts
+        return False
+    if "O(" in s or "\\sqrt[" in s:              # big-O, nth roots
+        return False
+    body = re.sub(r"\\[a-zA-Z]+", "", s)
+    if any(c.isalpha() and c.lower() not in _SCHOOL_VARS for c in body):
+        return False
+    return True
+
+
 def fetch_rows(offset: int, length: int) -> list[dict]:
     url = (f"{ROWS_API}?dataset={DATASET}&config=default&split=train"
            f"&offset={offset}&length={length}")
@@ -145,6 +170,14 @@ def self_check() -> None:
             "x" * 60]                                     # too long
     for s in drop:
         assert not is_school_level(s), f"should drop non-school maths: {s}"
+    # --strict must keep school algebra and drop the content that produced the
+    # misreads in the first PQ-01 run.
+    for s in ["3x+7=22", "\\frac{3}{4}", "x^{2}+5x", "2\\pi", "y=5x-3"]:
+        assert is_strict_school(s), f"strict should keep: {s}"
+    for s in ["4^{4^{+^{n}}}", "[x,x+O(x^{21/40})]", "\\sqrt[55]{2}",
+              "\\frac{449}{7}", "(h_{o})_{k}=h_{2k+1}", "K(\\sqrt{1-k^{2}})"]:
+        assert not is_strict_school(s), f"strict should drop: {s}"
+
     assert latex_norm("\\frac{1}{2}") == latex_norm("\\frac {1} {2}")
     assert latex_norm("{x}^{2}") == latex_norm("x^2")
     assert latex_norm("$3x+7=22$") == "3x+7=22"
@@ -160,6 +193,8 @@ def main() -> int:
     p.add_argument("--seed", type=int, default=20260909)
     p.add_argument("--scan", type=int, default=1200,
                    help="dataset rows to scan for school-level samples")
+    p.add_argument("--strict", action="store_true",
+                   help="restrict to Grade 10-12-looking expressions (see is_strict_school)")
     p.add_argument("--self-check", action="store_true")
     args = p.parse_args()
 
@@ -178,10 +213,11 @@ def main() -> int:
     need = args.pages * args.lines
     print(f"scanning up to {args.scan} rows for {need} school-level expressions...")
 
+    keep = is_strict_school if args.strict else is_school_level
     picked = []
     for off in range(0, args.scan, 100):
         for row in fetch_rows(off, 100):
-            if is_school_level(row["latex"]):
+            if keep(row["latex"]):
                 picked.append(row)
         print(f"  scanned {min(off + 100, args.scan)}, kept {len(picked)}")
         if len(picked) >= need:
