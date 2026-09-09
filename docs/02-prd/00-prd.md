@@ -141,6 +141,7 @@ Priority: **M** = must for v0 pilot · **S** = should · **C** = could · **W** 
 | **FR-005** | Step-down scaffolding: on hesitation, drop one abstraction layer | M | P-STU |
 | **FR-006** | Push-to-talk voice input with on-screen transcript | M | P-STU |
 | **FR-007** | Spoken response with **full text parity** — every spoken word also rendered | M | P-STU |
+| **FR-026** | **Transcription confirmation** — show the student what was read and have them confirm before reasoning on it | **M** | P-STU |
 | **FR-008** | Annotate the captured image to indicate the line under discussion | S | P-STU |
 | **FR-009** | Session persistence and resume after disconnect | M | P-STU |
 | **FR-020** | Tag every session turn to a curriculum topic node (CBSE base graph) | M | P-BUY |
@@ -178,6 +179,22 @@ Then the tutor drops one abstraction layer and offers a concrete instance or ana
 And it does not repeat the original question
 And after 3 consecutive step-downs on the same node, it offers to move on rather than continue
 ```
+
+**FR-026 — Transcription confirmation**
+```gherkin
+Given the system has transcribed the student's handwritten working
+When it responds for the first time on that image
+Then it states what it read, in the student's own notation
+And it asks the student to confirm or correct it before any tutoring begins
+And if the student corrects a line, the corrected text replaces the transcription
+```
+
+> **Added after `PQ-01` measured 87.5%** (`../07-quality/01-pq1-results.md`), inside the
+> 80–92% band where §2's input model holds *with* a confirmation step. It costs one
+> round-trip and converts a silent misread — the tutor reasoning confidently about
+> working the student never wrote — into a visible, correctable one. This is what a
+> careful human tutor does anyway: *"I've read your second line as 3x = 15, is that
+> right?"* Not a workaround for a weak model.
 
 > The 3-step-down ceiling is the anti-interrogation valve from
 > `00-problem-and-personas.md` §2.1. Without it the product becomes a hostile quiz, which

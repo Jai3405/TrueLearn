@@ -20,6 +20,26 @@ phase: 8 — pulled forward, because GD-12 blocks pricing
 
 **FX assumption:** ₹88 = US$1. Not independently verified — treat INR figures as ±10%.
 
+> ### ⚠️ Correction pending — the modelled inference price is for a model you cannot use
+>
+> This document prices LLM inference at **$0.10/$0.40 per 1M tokens (Gemini 2.5
+> Flash-Lite)**. Verified 2026-09-09 against a real API key: **`gemini-2.5-flash` and
+> `gemini-2.5-flash-lite` return 404 — "no longer available to new users."** A newly
+> created account cannot buy that price.
+>
+> The working substitute is **`gemini-flash-lite-latest`**, which is also the only tier
+> that could be measured reliably in `PQ-01` (87.5%; the 3.5 and 3.8 tiers were
+> rate-limited to the point of being unmeasurable).
+>
+> **What this does and does not change.** §2's conclusion is unaffected: even at 10×
+> the modelled token price, gross margin at ₹750/student/year stays above 90% — variable
+> cost still is not the constraint, and the school-count arithmetic in §3 that drives the
+> pricing recommendation does not move at all. What needs redoing is the **per-session
+> figure** in §1, and `FR-026` (transcription confirmation) adds a round-trip on top.
+>
+> **Action:** re-derive §1 against current published `flash-lite-latest` pricing before
+> any of these numbers go in front of an investor. Tracked as `CQ-05`.
+
 ---
 
 ## 1. Variable cost, bottom-up
