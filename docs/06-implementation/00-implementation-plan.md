@@ -2,10 +2,10 @@
 title: Implementation Plan
 status: draft
 owner: CTO (incoming)
-version: 0.1.0
+version: 0.2.0
 last_updated: 2026-09-16
 reviewers: [Aakash Dyavanapally (CEO), Pranav Chaitanya Varma (COO)]
-phase: 5 — Implementation Plan
+phase: 5 — Implementation Plan (gate passed 2026-09-16)
 inputs: [04-design/01-lld.md, 05-adr/ADR-011, 08-security/00-legal-and-safeguarding-action-pack.md]
 ---
 
@@ -62,14 +62,16 @@ flowchart LR
     M2 --> M3["M3 · Pilot-ready<br/>wk 20"]
     M3 --> M4["M4 · Evidence<br/>wk 22+"]
 
-    FD07["FD-07 device<br/>OPEN"] -.->|blocks| M0
-    FD08["FD-08 DCPO<br/>OPEN"] -.->|blocks| M2
-    FD09["FD-09 pager<br/>OPEN"] -.->|blocks| M2
+    SPK4["SPK-4 detector precision<br/>sizes the rota"] -.-> M2
     ENT["Entity ~3 wks"] -.->|blocks contract| M3
+    LAW["Lawyer Q1<br/>ask week 4"] -.-> M2
 ```
 
-**Three open founder decisions sit on the critical path**, and `FD-07` (which device) blocks
-the earliest milestone. None are engineering work. All three are answerable this week.
+**No founder decision now blocks the critical path** — all six closed at the phase-5 gate
+(`GD-14`–`GD-17`). What remains is execution: the entity (~3 weeks, CEO), `SPK-4` (mine,
+sizes the rota under `GD-15`), and the lawyer opinion on Q1, which should be **asked in week
+4, not week 20** — if the answer is unfavourable the review rota must be staffed before
+launch, and that is a funding conversation with a long lead time.
 
 ---
 
@@ -188,11 +190,27 @@ is also where `PQ-03` (is device-native TTS acceptable to a teenager?) finally g
 answered, which is currently an open question with zero cost to resolve and real design
 consequences.
 
-**Combined: first real students in late November, school pilot in June 2027 with a product
-that has already met children.** That is a materially better plan than a February scramble.
+### Decided at the phase-5 gate, 2026-09-16
 
-> **This is a recommendation, not a decision.** It changes GTM sequencing, which is the
-> CEO's call, not mine.
+**`PD-01` taken. `PD-02` and `PD-03` declined** (`GD-17`). Full scope is kept — including
+the baseline diagnostic, so the learning-gain evidence for renewal survives.
+
+**The consequence, stated plainly:** Class 11 removes the *lockdown* problem, but 19 Feb
+2027 still lands roughly six weeks before Class 11 annual exams and the end of the academic
+year in April. **A February start is therefore a three-week stub, not a pilot. The real
+pilot start is June 2027, with the new academic year.**
+
+That is not a failure of the plan — it is the plan working. Keeping full scope and starting
+in June converts **Feb–May into buffer**, and buffer is exactly what `A-023` (±30% on
+estimates, no velocity history) needs. The alternative was spending that uncertainty margin
+by cutting the baseline: three weeks bought, the renewal case damaged.
+
+**What Feb–May is for:** hardening, the published safeguarding policy, the MSA, the lawyer
+opinion, `SPK-4`, and school contracting for a June cohort.
+
+> **Reopen `PD-03` if June slips.** A 5-student trial is the only thing here that puts the
+> product in front of a real teenager before mid-2027, and `PQ-03` (is device-native TTS
+> acceptable to a teenager?) stays unanswered until something like it happens.
 
 ---
 
@@ -231,8 +249,8 @@ None of this is on the critical path for *code*, but all of it blocks *launch*.
 | Risk | Impact | Mitigation |
 |---|---|---|
 | **The engineer is also the pager** | Velocity loss is real and unmodellable | `FD-09` explicitly. If the pager fires often the schedule moves — say so early, don't absorb it silently |
-| `FD-07` unanswered | **M0 cannot start correctly** | Answer this week. It is one phone call to a school |
-| February board exams | Pilot deferred to June | §6 lever 1 — pilot Class 11 |
+| ~~`FD-07` unanswered~~ | ~~M0 cannot start~~ | ✅ Closed — `GD-16`, mobile-web-first |
+| **June 2027 pilot start** | Nothing reaches a real teenager for ~9 months | §6 — Feb–May is buffer, not slack. **Reopen `PD-03` if June slips** |
 | Provider model deprecation mid-build | Re-run evals, possible prompt rework | `ADR-007` abstraction + `FR-021` CI gate already cover this. It has already happened once (`CQ-05`) |
 | Slice 3 overruns | Everything slips | It is the most uncertain estimate here. Re-forecast at M0, not at M1 |
 | Lawyer answers Q1 unfavourably | Review SLA becomes criminal exposure; rota must be staffed before launch | Ask early — week 4, not week 20 |
@@ -249,14 +267,24 @@ None of this is on the critical path for *code*, but all of it blocks *launch*.
 
 ## Open Questions for Founders
 
-| ID | Question | Blocks |
-|----|----------|--------|
-| `FD-07` | **Which device?** | M0, this week |
-| `FD-08` | **Who is DCPO, who is Deputy?** | M2 deploy |
-| `FD-09` | **Accept the 24×7 pager?** | M2 deploy, and the velocity assumption |
-| `PD-01` | **Pilot Class 11 instead of Class 10?** (§6 lever 1 — free, high leverage) | Pilot timing |
-| `PD-02` | **Defer slices 6–7 to buy 3 weeks?** Trades renewal evidence for a faster start | M3 scope |
-| `PD-03` | **Run a 5-student unpaid trial at M1 (late Nov)?** | Whether children see this in 2026 at all |
+**All six closed at the phase-5 gate, 2026-09-16.** Nothing in this plan is now blocked on a
+founder decision.
+
+| ID | Question | Resolution |
+|----|----------|-----------|
+| `FD-07` | Which device? | ✅ **`GD-16`** — mobile-web-first; the question no longer blocks M0 |
+| `FD-08` | Who is DCPO? | ✅ **`GD-14`** — non-technical founder is DCPO, technical founder Deputy |
+| `FD-09` | Accept the 24×7 pager? | ✅ **`GD-15`** — accepted in principle, rota sized after `SPK-4` |
+| `PD-01` | Pilot Class 11? | ✅ **`GD-17`** — taken |
+| `PD-02` | Defer slices 6–7? | ❌ Declined — full scope kept, baseline survives |
+| `PD-03` | 5-student trial in November? | ❌ Declined — **reopen if the June 2027 start slips** |
+
+**Newly open, and mine to close:**
+
+| ID | Item | Owner |
+|----|------|-------|
+| `SPK-4` | Safeguarding detector precision/recall. **`GD-15` makes the rota depend on it** | CTO |
+| `CQ-06` | Cost model does not carry the safeguarding on-call cost | CTO — phase 8 |
 
 ---
 
@@ -265,6 +293,7 @@ None of this is on the critical path for *code*, but all of it blocks *launch*.
 | Version | Date | Author | Change |
 |---------|------|--------|--------|
 | 0.1.0 | 2026-09-16 | CTO (incoming) | Initial plan. 7 slices, 5 milestones with exit tests, ~79 engineer-days ≈ 22 weeks at realistic solo capacity. Flags the February board-exam collision and three levers against it. |
+| 0.2.0 | 2026-09-16 | CTO (incoming) | **Phase-5 gate passed.** All six founder decisions closed (`GD-14`–`GD-17`); nothing is blocked on a decision. `PD-01` taken, `PD-02`/`PD-03` declined — full scope kept, so the real pilot start is **June 2027** and Feb–May becomes buffer against `A-023`. Adds `SPK-4` and `CQ-06`. |
 
 ## Related documents
 

@@ -89,14 +89,27 @@ week not spent on the thing that gets a student in front of the product.
 | **GD-08** | **90-day goal: one build serving both a real pilot and the investor demo** | Achievable only if the non-goals hold |
 | **GD-09** | **Budget: zero.** `SPK-1` runs on free tiers (Gemini free tier, free OpenRouter models) | Costs time, not money |
 
+### Decisions taken at the phase-5 gate, 2026-09-16
+
+| ID | Decision | Rationale |
+|----|----------|-----------|
+| **GD-14** | **The non-technical founder is DCPO. The technical founder is Deputy DCPO** (`FD-08`) | POCSO §19 liability attaches to a **named individual**, not to a company. Putting it on the sole engineer would interrupt the critical path every time a case opens; the non-technical founder already owns school relationships and knows the Principal and counsellor by name. **Both names must be published before launch** |
+| **GD-15** | **The 24×7 60-minute safeguarding pager is accepted in principle. The rota is sized after `SPK-4`** (`FD-09`) | Unblocks M2 without committing to a shift pattern built on a guess. The ~6 flags/week estimate rests on `A-019` — an **unmeasured 1% per-session flag rate**. `SPK-4` replaces it with a measurement before anyone commits to carrying nights |
+| **GD-16** | **Build mobile-web-first. `GD-10` is closed without needing the answer** (`FD-07`) | The phone is the constrained case: if photo capture works on a 6-inch screen it works on a tablet or lab desktop with file upload. Unblocks M0 now and keeps all four device options open. **This is why the PRD moved from canvas to photo capture** — the canvas is what made the device question load-bearing |
+| **GD-17** | **The pilot runs with Class 11, not Class 10** (`PD-01`) | Class 11 sits inside the approved band (`GD-03`) and has **no board exam**, so the school will permit experimentation in a term when Classes 10 and 12 are in revision lockdown. Free, and it changes nothing in the build |
+
+**Declined at the same gate:** `PD-02` (deferring slices 6–7) and `PD-03` (a 5-student
+November trial). **Full scope is kept, including the baseline diagnostic** — so the
+learning-gain evidence for renewal survives. See §7 for what that does to the date.
+
 ### Still open
 
 | ID | Open decision | Blocking | Owner |
 |----|--------------|----------|-------|
-| **GD-10** | **Primary device for v0** — shared Android phone / family laptop / school tablet | **Blocks the PRD.** A handwriting canvas on a 6-inch screen with a finger is a different product and would change the wedge | **CEO — asking school contacts this week** |
+| ~~**GD-10**~~ | ~~Primary device for v0~~ | ✅ **Closed by `GD-16`** — mobile-web-first makes the answer non-blocking | — |
 | **GD-11** | **Canvas engine.** The infinite-canvas override was raised but not resolved; PenEcho's AGPL-3.0 network copyleft may require publishing our source | `ADR-006` at the TAR gate. **Recommendation: MIT-licensed engine (Excalidraw or Konva)** rather than PenEcho or tldraw (not open source) | CTO |
 | **GD-12** | **Pricing model.** Founder asked for a bottom-up cost model before deciding | Requires the phase-8 cost model, pulled forward | CTO |
-| **GD-13** | **Entity formation.** No entity blocks any real pilot with children's data | Founder decision; ~$500 was declined under zero budget | CEO |
+| ~~**GD-13**~~ | ~~Entity formation~~ | ✅ **Closed 2026-09-16: Private Limited, Telangana.** ₹15k to incorporate; **₹30–45k/yr recurring** because statutory audit is mandatory at zero revenue. Execution, not a decision | CEO |
 
 ---
 

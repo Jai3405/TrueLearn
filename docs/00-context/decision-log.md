@@ -85,9 +85,9 @@ safeguarding research. `FD-08` and `FD-09` block launch.
 | **FD-04** | Budget for external counsel on children's data | CEO | ⚠️ **REOPENED 2026-09-16.** Previously declined on zero budget. Two questions now carry **criminal** (POCSO §19 machine-knowledge) and **₹200 crore** (DPDP §9) exposure that no amount of statute-reading resolves. **₹40–80k.** Action pack §7 |
 | FD-05 | Whether the claims-audit rewrites are adopted | CEO | 🔲 **Still open** — phase 9 |
 | **FD-06** | **Legal entity formation** | CEO | ✅ **Decided 2026-09-16: Private Limited, Telangana.** ₹15k to incorporate, ~3 weeks; **₹30–45k/yr recurring because statutory audit is mandatory at zero revenue.** Execution now, not a decision. Action pack §1 |
-| **FD-07** | **Primary device for v0** | CEO | 🔲 **Open and blocking the PRD** (`GD-10`). Founder asking school contacts this week |
-| **FD-08** | **Who is DCPO, and who is Deputy?** | Both | 🔲 **Open and blocking launch.** POCSO §19 liability attaches to a **named individual**, not to the company. It cannot be "whoever is around" |
-| **FD-09** | **Accept a 24×7 60-minute safeguarding pager between the two of you?** | Both | 🔲 **Open and blocking launch.** Viable to ~3 schools, breaks at ~5. The only way to launch unfunded |
+| **FD-07** | **Primary device for v0** | CEO | ✅ **Closed 2026-09-16 (`GD-16`): mobile-web-first.** The phone is the constrained case, so the device answer stops being load-bearing |
+| **FD-08** | **Who is DCPO, and who is Deputy?** | Both | ✅ **Decided 2026-09-16 (`GD-14`): the non-technical founder is DCPO, the technical founder Deputy.** Protects the critical path, and the DCPO already knows the school's people by name. **Both names must be published before launch** |
+| **FD-09** | **Accept a 24×7 60-minute safeguarding pager?** | Both | ✅ **Accepted in principle 2026-09-16 (`GD-15`). Rota sized after `SPK-4`** — the flag-volume estimate is currently a guess (`A-019`) |
 | **FD-10** | **Pilot school's board affiliation and counsellor name** | CEO | 🔲 **Open.** CBSE mandates a counsellor; state boards do not. Decides whether Tier 1 has anywhere to route |
 
 ---
