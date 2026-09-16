@@ -1,25 +1,24 @@
-# Spike outputs — transcripts and per-image results, regenerated on every run
-spikes/out/
 
-# Student handwriting is children's personal data. Never commit it.
+!.env.example
 # Keep sample images outside the repo; these patterns are a backstop, not the control.
-*.jpg
-*.jpeg
-*.png
-*.webp
-*.heic
-truth.json
-
+# OS
+# Python
 # Secrets
+# Spike outputs — transcripts and per-image results, regenerated on every run
+# Student handwriting is children's personal data. Never commit it.
+*.heic
+*.jpeg
+*.jpg
+*.png
+*.py[cod]
+*.pyc
+*.webp
+.DS_Store
 .env
 .env.*
-!.env.example
-
-# Python
-__pycache__/
-*.py[cod]
 .venv/
+__pycache__/
+app/__pycache__/
+spikes/out/
+truth.json
 venv/
-
-# OS
-.DS_Store
