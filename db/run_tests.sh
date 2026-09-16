@@ -5,6 +5,19 @@
 #   ./db/run_tests.sh
 #
 # Exit 0 = tenant isolation holds. Non-zero = do not ship.
+#
+# WITHOUT DOCKER (verified 2026-09-16 against postgresql@16 on macOS, where Docker
+# Desktop's VM would not boot). Note --locale=C: initdb fails with "invalid locale
+# settings" under the default macOS environment.
+#
+#   export PATH=/opt/homebrew/opt/postgresql@16/bin:$PATH LANG=C LC_ALL=C
+#   D=/tmp/tl-pg; P=54399
+#   initdb -D $D -U postgres --auth=trust --locale=C --encoding=UTF8
+#   pg_ctl -D $D -o "-p $P -k $D -c listen_addresses=''" -l $D/log start
+#   createdb -h $D -p $P -U postgres truelearn
+#   psql -v ON_ERROR_STOP=1 -h $D -p $P -U postgres -d truelearn -f db/001_schema.sql
+#   psql -v ON_ERROR_STOP=1 -h $D -p $P -U postgres -d truelearn -f db/002_isolation_test.sql
+#   pg_ctl -D $D stop -m immediate
 
 set -euo pipefail
 

@@ -105,9 +105,21 @@ select assert_raises(
     values ('22222222-2222-2222-2222-222222222222','X-999',11,'A')$$,
   'school A cannot INSERT a row belonging to school B');
 
-select assert_raises(
-  $$update students set section = 'HACKED' where external_ref = 'B-001'$$,
-  'school A cannot UPDATE school B''s student');
+-- A cross-tenant UPDATE does NOT raise. RLS makes B's row invisible, so the statement
+-- matches zero rows and succeeds trivially -- the same "zero rows, not an error" principle
+-- as the SELECT above.
+--
+-- This matters operationally: if you watch for errors to detect a cross-tenant attack, you
+-- will see nothing at all, because the write silently affects nothing. Detection has to
+-- come from the RLS-denial and anomaly signals in 09-ops, not from exceptions.
+update students set section = 'HACKED' where external_ref = 'B-001';
+select assert((select count(*) from students where section = 'HACKED') = 0,
+              'cross-tenant UPDATE as school A affected nothing visible to A');
+
+set app.school_id = '22222222-2222-2222-2222-222222222222';
+select assert((select section from students where external_ref = 'B-001') = 'C',
+              'school B''s row is UNCHANGED -- the cross-tenant UPDATE truly did nothing');
+set app.school_id = '11111111-1111-1111-1111-111111111111';
 
 \echo ''
 \echo '=== 4. k-anonymity is a constraint, not a convention (FR-024) =================='
