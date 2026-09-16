@@ -40,8 +40,8 @@ contradict each other in nine recorded places.
 | 2 · PRD | [`02-prd/`](02-prd/) | ✅ Delivered — `FR-026` added after `PQ-01` | ⚠️ `NFR-011` needs rewrite — see phase 7 |
 | 3 · TAR | [`03-tar/`](03-tar/) | ✅ Delivered | **Passed 2026-09-15** — all 7 subsystem calls approved |
 | 4 · Design + ADRs | [`04-design/`](04-design/), [`05-adr/`](05-adr/) | ✅ Delivered — **HLD/LLD at v0.2.0**, all ADRs decided | §7 of the HLD corrected 2026-09-16 |
-| 5 · Implementation | [`06-implementation/`](06-implementation/) | **In progress** | — |
-| 6 · Quality & Eval | [`07-quality/`](07-quality/) | Partial — `SPK-1` and `PQ-01` measured | — |
+| 5 · Implementation | [`06-implementation/`](06-implementation/) | ✅ **Delivered** — 7 slices, 5 milestones | **Gate passed 2026-09-16** — `GD-14`–`GD-17` |
+| 6 · Quality & Eval | [`07-quality/`](07-quality/) | ✅ **Delivered** — strategy + 2 harnesses measuring | Approve the release gates — [`02-test-and-eval-strategy.md`](07-quality/02-test-and-eval-strategy.md) §2 |
 | 7 · Security & Compliance | [`08-security/`](08-security/) | **Pulled forward — delivered** | Closes `FD-06`, `ADR-009`, `ADR-011` |
 | 8 · Ops & Cost | [`09-ops/`](09-ops/) | Partial — cost model exists | ⚠️ Missing the safeguarding on-call cost |
 | 9 · GTM & Diligence | [`10-gtm/`](10-gtm/) | Not started | — |
@@ -103,3 +103,4 @@ inputs/                           ← source PDFs and site snapshot (EMPTY — s
 | Version | Date | Author | Change |
 |---------|------|--------|--------|
 | 0.1.0 | 2026-09-07 | CTO (incoming) | Index created; phase 0 documents landed. |
+| 0.2.0 | 2026-09-16 | CTO (incoming) | Status table brought current: phases 0–7 delivered, phase 5 gate passed. `SPK-3` retired, `SPK-4` added. Phase 7 pulled forward because it reversed part of the accepted design. |
