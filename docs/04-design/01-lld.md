@@ -2,11 +2,11 @@
 title: Low-Level Design
 status: draft
 owner: CTO (incoming)
-version: 0.1.0
+version: 0.2.0
 last_updated: 2026-09-16
 reviewers: [Aakash Dyavanapally (CEO), Pranav Chaitanya Varma (COO)]
 phase: 4 — Design
-inputs: [04-design/00-hld.md, 03-tar/00-tar.md, 02-prd/00-prd.md]
+inputs: [04-design/00-hld.md, 03-tar/00-tar.md, 02-prd/00-prd.md, 05-adr/ADR-011]
 ---
 
 # Low-Level Design
@@ -63,7 +63,8 @@ create table sessions (
   started_at    timestamptz not null default now(),
   ended_at      timestamptz,
   end_reason    text check (end_reason in
-                  ('completed','abandoned','safeguarding_halt','error'))
+                  ('completed','abandoned','safeguarding','error'))
+  -- 'safeguarding' = ended while in SupportMode, NOT halted by us. ADR-011 v0.2.0
 );
 
 create table turns (
@@ -96,12 +97,19 @@ create table section_topic_friction (
   constraint k_anonymity check (student_count >= 5)  -- FR-024, enforced by the DB
 );
 
--- Append-only. Survives consent withdrawal.
+-- Append-only. Survives consent withdrawal. Retained >=180 days, in India (CERT-In).
+-- In a POCSO s.21 prosecution this table is the evidence that a report was made, and when.
 create table safeguarding_events (
   id            uuid primary key default gen_random_uuid(),
   school_id     uuid not null references schools(id),
   session_id    uuid not null references sessions(id),
+  tier          smallint not null check (tier between 0 and 4),   -- ADR-011
+  category      text not null check (category in
+                  ('self_harm','abuse','threat_to_others','other')),
+  parent_implicated boolean not null default false,  -- forces Tier 3 routing
   detected_at   timestamptz not null default now(),
+  reviewed_at   timestamptz,                         -- the 60-min SLA clock stops here
+  reviewed_by   text,                                -- the NAMED human. POCSO s.19
   notified_at   timestamptz,
   notified_who  text,
   excerpt       text not null
@@ -159,11 +167,16 @@ REST, JSON, all tenant-scoped by the authenticated session.
   "session_state": "tutoring"
 }
 
-// 200 — safeguarding halt. Not an error: a designed terminal state.
+// 200 — safeguarding. Not an error, and NOT terminal: the session stays open.
 {
   "turn_seq": 4,
   "tutor_text": "It sounds like something serious is going on...",
-  "session_state": "halted_safeguarding"
+  "session_state": "support_mode",
+  "resources": [
+    { "name": "Tele-MANAS", "tel": "14416", "hours": "24x7", "lang": ["te","en"] },
+    { "name": "Vandrevala", "tel": "9999666555", "whatsapp": true, "hours": "24x7" },
+    { "name": "Childline",  "tel": "1098",  "hours": "24x7" }
+  ]
 }
 ```
 
@@ -189,14 +202,21 @@ stateDiagram-v2
     Tutoring --> Tutoring: turn
     Tutoring --> Completed: student reaches own answer
     Tutoring --> Abandoned: 15 min idle
-    Tutoring --> HaltedSafeguarding: disclosure detected
-    HaltedSafeguarding --> [*]
+    Tutoring --> SupportMode: disclosure detected
+    SupportMode --> SupportMode: student keeps talking
+    SupportMode --> [*]: student leaves
     Completed --> [*]
     Abandoned --> [*]
 ```
 
-`HaltedSafeguarding` is **terminal**. No path resumes tutoring — a student in distress is
-not returned to algebra by the machine.
+**`SupportMode` has no edge back to `Tutoring`** — a student in distress is not returned to
+algebra by the machine. But it is **not terminal**, and that distinction is the whole point:
+the session stays open, helplines on screen, and the student can keep talking.
+
+> **Corrected 2026-09-16 (`ADR-011` v0.2.0).** This state was `HaltedSafeguarding` and was
+> terminal — the app closed on the student. No major provider does that, and the reason is
+> that ending the session punishes a child for disclosing and teaches concealment. The
+> tutor withdraws from *teaching*, not from the student.
 
 ### Step-down ladder
 
@@ -309,7 +329,7 @@ Build the guard early — it is the thing that cannot be retrofitted safely.
 | 1 | Schema + RLS + a test that school A cannot read school B | `F6` closed |
 | 2 | Photo → transcription → confirmation | `FR-001/002/026` |
 | 3 | Policy engine + v2 prompt + **guard** | The product promise |
-| 4 | Safeguarding screen + halt | Launch precondition |
+| 4 | Safeguarding screen + `SupportMode` + tiered routing (`ADR-011`) | Launch precondition |
 | 5 | Consent gate + roster CSV | Pilot-blocking |
 | 6 | Cohort aggregator with k≥5 | The teacher view |
 | 7 | Baseline diagnostic | Renewal evidence |
@@ -323,8 +343,8 @@ front of a child.
 
 | ID | Question | Blocks |
 |---|---|---|
-| `ADR-011` | Safeguarding detector: model-based or rules? What false-negative rate is tolerable? | §3 halt state |
-| `ADR-009` | Cross-border transfer basis | Any real student data |
+| `SPK-4` | Safeguarding detector: model, rules, or both? **Measure precision** — it sizes the on-call rota and sets the hiring cliff | Slice 4 |
+| ~~`ADR-009`~~ | ~~Cross-border transfer basis~~ | ✅ **Closed** — lawful; §16 blacklist is empty |
 | `TQ-02` | Does the model silently correct a student's error? | §4 step 3 |
 | `TQ-01` | Google Workspace at the pilot school? | §2 roster endpoint |
 
@@ -335,6 +355,7 @@ front of a child.
 | Version | Date | Author | Change |
 |---------|------|--------|--------|
 | 0.1.0 | 2026-09-16 | CTO (incoming) | Initial LLD. Schema with k-anonymity as a DB constraint, API contracts, 2 state machines, policy engine, eval harness. Canvas schema omitted — no canvas. |
+| 0.2.0 | 2026-09-16 | CTO (incoming) | **`HaltedSafeguarding` → `SupportMode`, no longer terminal** (`ADR-011` v0.2.0). `safeguarding_events` gains `tier`, `category`, `parent_implicated`, and the review fields that evidence the POCSO §19 report. `ADR-009` closed. |
 
 ## Related documents
 

@@ -2,11 +2,11 @@
 title: High-Level Design
 status: draft
 owner: CTO (incoming)
-version: 0.1.0
+version: 0.2.0
 last_updated: 2026-09-16
 reviewers: [Aakash Dyavanapally (CEO), Pranav Chaitanya Varma (COO)]
 phase: 4 — Design
-inputs: [03-tar/00-tar.md, 02-prd/00-prd.md, 00-context/decision-log.md]
+inputs: [03-tar/00-tar.md, 02-prd/00-prd.md, 00-context/decision-log.md, 08-security/00-legal-and-safeguarding-action-pack.md]
 ---
 
 # High-Level Design
@@ -26,7 +26,7 @@ escalation**, and a **canvas command schema**. All three were removed:
 | Barge-in interrupt path | **Photo capture → transcription → confirmation** | `GD-02` — push-to-talk, no barge-in |
 | Teacher escalation path | **Cohort aggregation** | `GD-07` — no per-student profile, so no per-student escalation |
 | Canvas command schema v1 | *(dropped)* | PRD §2 — input is a photograph |
-| — | **Safeguarding disclosure** *(added)* | `ADR-011`, a launch precondition with no design yet |
+| — | **Safeguarding disclosure** *(added)* | `ADR-011`, a launch precondition. **Now designed — §7** |
 
 ---
 
@@ -53,8 +53,12 @@ flowchart TB
 ```
 
 **The boundary that matters:** the LLM provider is **outside India**. Student data at rest
-is in India (`NFR-007`), but every turn crosses a border in flight. That is a lawful-basis
-question, not an infrastructure one — `ADR-009`, blocked on `SPK-3`.
+is in India (`NFR-007`), but every turn crosses a border in flight.
+
+**Resolved — `ADR-009` Accepted.** DPDP §16 is a blacklist with **no country notified**, and
+does not commence until **13 May 2027**. The crossing is lawful; no transfer instrument is
+needed. What we may *not* do is claim inference happens in India — most vendor "residency"
+covers storage only. `SPK-3` is retired to a standing gazette watch.
 
 ---
 
@@ -257,31 +261,50 @@ sequenceDiagram
     participant S as Student
     participant API as Session API
     participant D as Safeguarding detector
-    participant H as Named human at school
+    participant DCPO as DCPO (ours, named)
+    participant EXT as Police / parent / 112
+    participant SCH as School counsellor
     participant AUD as Immutable audit log
 
     S->>API: message containing a disclosure
     API->>D: screen (runs on every turn)
-    D-->>API: flagged
-    API->>API: HALT tutoring immediately
-    API->>S: scripted, non-clinical response
-    API->>H: alert within 15 min (NFR-011)
+    D-->>API: flagged + tier
+    API->>API: leave tutoring, enter SupportMode
+    API->>S: scripted non-clinical reply<br/>+ 14416 / Vandrevala / 1098
     API->>AUD: append-only record
-    Note over API: never counsels, never diagnoses,<br/>never continues the lesson
+    alt Tier 3 — abuse, or parent implicated
+        API->>DCPO: 60 min, 24x7
+        DCPO->>EXT: report to SJPU / police<br/>NO verification first
+        Note over DCPO,EXT: parent NOT notified where implicated
+    else Tier 2 — self-harm
+        API->>DCPO: 60 min, 24x7
+        DCPO->>EXT: parent by SMS + call<br/>112 if imminent and parent unreachable
+    else Tier 1 — low concern
+        API->>SCH: next business day, summary only
+    end
 ```
 
 **Design constraints, all non-negotiable:**
 
 - Screening runs on **every** student turn, before tutoring logic — not as a filter on the
   reply.
-- The tutor **stops**. It does not attempt support, and it never claims to be human
-  (`FR-022`).
-- A **named human** at the school, not a queue.
-- The audit log is **append-only**, because this is the record that matters if anything
-  goes wrong.
+- **The session does not terminate.** The tutor stops *tutoring* and does not return to it,
+  but stays present with helplines on screen. It never counsels, diagnoses, or claims to be
+  human (`FR-022`).
+- **Classification is by what was disclosed, not by severity.** Abuse and self-harm carry
+  opposite legal duties and take different paths.
+- The **named human is ours** — a DCPO, personally liable under POCSO §19. The school is a
+  next-business-day destination, because **no Indian school has a safeguarding human awake
+  at 9pm**.
+- The audit log is **append-only** and retained **180 days in India** (CERT-In).
 
-**This path has no design owner yet** and `ADR-011` is still pending. It is a launch
-precondition: it must exist before one real student uses the product.
+**`ADR-011` is now Accepted** with the full tier design. It remains a launch precondition:
+it must exist before one real student uses the product.
+
+> **Corrected 2026-09-16.** This path previously halted the session terminally and alerted a
+> named human *at the school* within 15 minutes (`NFR-011`). Both were wrong — a terminal
+> halt punishes a child for disclosing, and the school contact does not exist out of hours.
+> See [`../08-security/00-legal-and-safeguarding-action-pack.md`](../08-security/00-legal-and-safeguarding-action-pack.md) §3.
 
 ---
 
@@ -295,7 +318,8 @@ precondition: it must exist before one real student uses the product.
 | Topic friction | Postgres, India | Aggregated nightly | **k≥5; individual signal discarded** |
 | Consent records | Postgres, India | Retained | Legal-basis evidence |
 | Safeguarding events | Append-only log | Retained | Not deleted by consent withdrawal |
-| **In flight to LLM** | **Crosses border** | Provider policy | ⚠️ `ADR-009`, needs `SPK-3` |
+| **In flight to LLM** | **Crosses border** | Provider policy | ✅ `ADR-009` — lawful, §16 blacklist is empty |
+| **ICT / audit logs** | **India** | **180 days minimum** | **CERT-In. Binds from incorporation, not 2027** |
 
 **The cohort aggregator is the compliance boundary.** Individual session signal enters, a
 section-level row leaves, and the individual signal is discarded. That keeps `GD-07` true by
@@ -319,9 +343,12 @@ construction rather than by policy — and it deserves an explicit test, not a c
 
 | ID | Item | Blocks |
 |---|---|---|
-| `ADR-009` | Cross-border transfer basis for inference | Any real student data |
-| `ADR-011` | Safeguarding escalation design | Launch |
-| `FD-06` | Legal entity | Any school contract |
+| ~~`ADR-009`~~ | ~~Cross-border transfer basis~~ | ✅ **Closed** — lawful, no instrument needed |
+| ~~`ADR-011`~~ | ~~Safeguarding escalation design~~ | ✅ **Closed** — designed and accepted; §7 corrected |
+| ~~`FD-06`~~ | ~~Legal entity~~ | ✅ **Decided** — Pvt Ltd, Telangana. Execution ~3 weeks |
+| `FD-08` | **Who is DCPO, who is Deputy?** | **Launch.** POCSO liability is personal |
+| `FD-09` | Accept a 24×7 60-min pager between two founders? | **Launch** |
+| `SPK-4` | Safeguarding detector precision/recall | Sizing the on-call rota |
 | `TQ-01` | Does the pilot school use Google Workspace? | §4 roster vs SSO |
 | `PQ-03` | Is device-native TTS acceptable to a teenager? | §2 speech decision |
 
@@ -332,6 +359,7 @@ construction rather than by policy — and it deserves an explicit test, not a c
 | Version | Date | Author | Change |
 |---------|------|--------|--------|
 | 0.1.0 | 2026-09-16 | CTO (incoming) | Initial HLD. C4 context + containers, 4 trust boundaries, 4 critical paths (barge-in and teacher-escalation substituted per §0). |
+| 0.2.0 | 2026-09-16 | CTO (incoming) | **§7 corrected — the halt was wrong.** Session no longer terminates; tiers replace a single flag; the named human moves from the school to our DCPO. `ADR-009` closed (crossing is lawful). CERT-In log residency added to §8. |
 
 ## Related documents
 

@@ -52,14 +52,20 @@ cost estimate**. A decision made in a chat message is not a decision.
 | ADR-006 | Canvas command protocol | ⏭️ `Moot` | — | — | **No canvas in v0** — input is a photograph (PRD §2). Revisit at v1 |
 | ADR-007 | Cloud inference provider and routing strategy | ✅ `Accepted` | 3 | Low-Medium if abstracted behind a router from day one | **Thin provider abstraction, one primary.** Two measured model constraints. TAR §2.3 |
 | ADR-008 | Edge/browser model | ❌ `Rejected` | 3 | Low | **Eliminated.** ~3 GB download; VAD is a 1–2 MB signal-processing task. `CL-034` |
-| ADR-009 | Data residency, retention and deletion policy | `Pending` | 3 (TAR) | **High** — storage topology follows from it | `A-007`, `SPK-3` |
+| ADR-009 | Data residency: cross-border basis for inference | ✅ `Accepted` | 7 | Low-Medium behind `ADR-007` | **Lawful. DPDP §16 is a blacklist and no country is notified**; §16 doesn't commence until 13 May 2027. [ADR-009](../05-adr/ADR-009-cross-border-inference.md) |
 | ADR-010 | Identity, SSO and rostering integration strategy | ✅ `Accepted` | 3 | Medium | **CSV roster for pilot, SSO before school #2.** Reverses the phase-1 position. TAR §2.6 |
-| ADR-011 | Safeguarding and self-harm disclosure escalation path | `Pending` | 2 (PRD) — **not deferrable to phase 7** | N/A — a launch precondition | Source of truth §5 #5 |
+| ADR-011 | Safeguarding and self-harm disclosure escalation path | ✅ `Accepted` | 7 | N/A — a launch precondition | **5 tiers, split by abuse vs self-harm. Session no longer terminates; the named human is ours, not the school's.** [ADR-011](../05-adr/ADR-011-safeguarding-escalation.md) |
+| ADR-015 | Empty or truncated model output is an error | ✅ `Accepted` | 4 | Low | Silence was scoring as good behaviour. [ADR-015](../05-adr/ADR-015-empty-model-output.md) |
 | ADR-012 | B2C tier: in or out of the first 18 months | ✅ `Accepted` | 1 | Medium | **Decided `O-05`: out.** School-paid model. B2C in India carries no education exemption under DPDP |
 
-**Most ADRs are now decided.** Outstanding: `ADR-009` (data residency — needs `SPK-3`),
-`ADR-011` (safeguarding escalation — phase 2), and `ADR-015` (empty/truncated output —
-ready to accept). `ADR-006` is moot; `ADR-008` rejected.
+**All ADRs are now decided.** `ADR-006` is moot; `ADR-008` rejected; every other ADR is
+Accepted. `ADR-009` and `ADR-011` closed 2026-09-16 — see
+[`../08-security/00-legal-and-safeguarding-action-pack.md`](../08-security/00-legal-and-safeguarding-action-pack.md).
+
+> **`ADR-011` v0.2.0 reversed two clauses of its own proposed version**, and both had already
+> propagated into the accepted HLD and LLD. The session no longer terminates on a
+> disclosure, and the 15-minute named human moved from the school to us. Recorded here
+> because a reversed decision that leaves no trace is how a document set starts lying.
 
 ---
 
@@ -67,17 +73,22 @@ ready to accept). `ADR-006` is moot; `ADR-008` rejected.
 
 Tracked here because they gate engineering work but are not mine to make.
 
-All resolved 2026-09-08 — see [`03-gate-decisions.md`](03-gate-decisions.md).
+Resolved 2026-09-08 — see [`03-gate-decisions.md`](03-gate-decisions.md). **Four are open
+again as of 2026-09-16**: `FD-04` reopened, and `FD-08`–`FD-10` are new, all from the
+safeguarding research. `FD-08` and `FD-09` block launch.
 
 | ID | Decision | Owner | Status |
 |----|----------|-------|--------|
 | FD-01 | Deployment claims on the public website | CEO | ✅ **Resolved** — never sent to anyone (`O-01`), so it is a housekeeping edit. Still do it |
 | FD-02 | Which market the first pilots run in | CEO | ✅ **Decided: Telangana / Andhra Pradesh** (`O-04`). Inverts `A-013` |
 | FD-03 | Whether both founders go full-time | Both | ✅ **Resolved** — both already full-time (`O-03`) |
-| FD-04 | Budget for external counsel on children's data | CEO | ✅ **Declined** — zero budget (`O-08`). Mitigated by `GD-07`: cohort-only aggregates avoid the prohibited activity by design rather than by legal opinion |
+| **FD-04** | Budget for external counsel on children's data | CEO | ⚠️ **REOPENED 2026-09-16.** Previously declined on zero budget. Two questions now carry **criminal** (POCSO §19 machine-knowledge) and **₹200 crore** (DPDP §9) exposure that no amount of statute-reading resolves. **₹40–80k.** Action pack §7 |
 | FD-05 | Whether the claims-audit rewrites are adopted | CEO | 🔲 **Still open** — phase 9 |
-| **FD-06** | **Legal entity formation** | CEO | 🔲 **Open and blocking.** No entity anywhere (`O-09`). A school cannot contract with an individual, and processing minors' data without a Data Fiduciary puts liability on the founders personally — `RISK-023` |
+| **FD-06** | **Legal entity formation** | CEO | ✅ **Decided 2026-09-16: Private Limited, Telangana.** ₹15k to incorporate, ~3 weeks; **₹30–45k/yr recurring because statutory audit is mandatory at zero revenue.** Execution now, not a decision. Action pack §1 |
 | **FD-07** | **Primary device for v0** | CEO | 🔲 **Open and blocking the PRD** (`GD-10`). Founder asking school contacts this week |
+| **FD-08** | **Who is DCPO, and who is Deputy?** | Both | 🔲 **Open and blocking launch.** POCSO §19 liability attaches to a **named individual**, not to the company. It cannot be "whoever is around" |
+| **FD-09** | **Accept a 24×7 60-minute safeguarding pager between the two of you?** | Both | 🔲 **Open and blocking launch.** Viable to ~3 schools, breaks at ~5. The only way to launch unfunded |
+| **FD-10** | **Pilot school's board affiliation and counsellor name** | CEO | 🔲 **Open.** CBSE mandates a counsellor; state boards do not. Decides whether Tier 1 has anywhere to route |
 
 ---
 
@@ -86,3 +97,4 @@ All resolved 2026-09-08 — see [`03-gate-decisions.md`](03-gate-decisions.md).
 | Version | Date | Author | Change |
 |---------|------|--------|--------|
 | 0.1.0 | 2026-09-07 | CTO (incoming) | Register opened. 12 pending ADRs, 5 pending founder decisions. |
+| 0.2.0 | 2026-09-16 | CTO (incoming) | **Last two ADRs closed.** `ADR-009` accepted (crossing is lawful), `ADR-011` accepted at v0.2.0 (reverses two clauses that had already reached the HLD/LLD), `ADR-015` added to the register. `FD-06` decided; `FD-04` reopened; `FD-08`–`FD-10` added. |
