@@ -162,13 +162,33 @@ Since variable cost is negligible, break-even is entirely about covering fixed c
 |---|---|---|
 | Curriculum / axiom graph authoring | Maths SME, part-time 6 months @ ₹40k/mo | ~$2,700 |
 | Founder subsistence (two, Hyderabad) | ₹60k/mo each | ~$16,400 |
-| Entity formation + annual compliance | `FD-06` — **verified**: ₹15k once + ₹30–45k/yr | ~$700 |
+| Entity formation + annual compliance | `FD-06` — ₹15k once + ₹30–45k/yr. **Stamp duty verified, `A-016` closed** ▼ | ~$700 |
 | Baseline hosting, domain, tooling | | ~$400 |
 | **CERT-In log retention** | 180 days, stored in India. **New — not optional** | ~$200 |
 | **Lawyer opinion** | `FD-04` reopened, one-time ₹40–80k | ~$680 |
 | **Subtotal, schools 1–4** | | **~$21,080** |
-| **Safeguarding reviewers** | **From school #5.** 2 part-time @ ₹25k/mo (`A-028`) | **~$6,818** |
+| **Safeguarding reviewers** | **From school #5.** 2 part-time @ ₹25k/mo (`A-028` — **verified** ▼) | **~$6,818** |
 | **Total, schools 5+** | | **~$27,900** |
+
+> **`A-016` closed 2026-09-16 — Telangana stamp duty confirmed.** ₹500 MOA + **0.15% of
+> authorised capital** on the AOA (min ₹1,000, max ₹5 lakh) + ₹20 on the incorporation
+> eForm. At ₹1 lakh authorised capital that is **₹1,520**; at ₹10 lakh, **₹2,020**. MCA
+> filing fees are **nil below ₹15 lakh** authorised capital.
+> ([incorpx](https://www.incorpx.io/blog/stamp-duty-company-registration-state-wise-2026),
+> [filingpro](https://filingpro.io/company-registration-fee-in-telangana/), retrieved
+> 2026-09-16.) **Corroborated across two secondary sources, not MCA directly** — the CA
+> confirms at filing, but the ₹15,000 incorporation budget holds.
+>
+> **`CQ-07` closed 2026-09-16 — reviewer cost confirmed.** School-counsellor roles in
+> Hyderabad advertise at **₹12,000–40,000/month**
+> ([apna.co listings](https://apna.co/jobs/title_school_counsellor-jobs-in-hyderabad),
+> retrieved 2026-09-16). `A-028`'s ₹25,000/month sits mid-range, so the ~$6,818/year figure
+> holds.
+>
+> **One caveat that makes it optimistic:** that range is for **standard-hours school
+> roles**. We need **24×7 on-call**, and unsocial hours normally carry a premium or require
+> more heads. Treat ₹6 lakh/year as a floor, not a ceiling — and note that `GD-15` defers
+> the actual rota until the classifier exists (`SPK-4` §6).
 
 ### 3.1 `CQ-06` — the step function the model was missing
 
@@ -386,7 +406,7 @@ document has now twice recommended one. That is the specific error to avoid repe
 | ~$0.015/session | `PQ-01` fails and OCR needs a metered service (Mathpix) or multiple retries per turn | Costs rise 3–10×. Still profitable at ₹1,000, but the cushion goes |
 | Device-native speech is acceptable | `PQ-03` shows students reject robotic TTS | Vendor TTS adds $0.030/session ≈ 3× cost. Still >70% margin at ₹1,000, but it changes the LLM budget |
 | **The safeguarding screen stays rules-first** | It becomes a per-turn LLM call | **Session cost more than doubles** (§1). This is a design constraint, not a preference |
-| **Reviewers cost ₹25k/mo part-time** (`A-028`) | Trained counsellors cost 2× that in Hyderabad | Break-even at ₹1,000 moves from 10 schools to ~13. **`CQ-07` — ask one counsellor** |
+| **Reviewers cost ₹25k/mo part-time** (`A-028`) | 24×7 on-call carries an unsocial-hours premium over the ₹12–40k advertised for standard-hours school roles | Each ₹25k/mo added is ~0.5 schools of break-even at ₹6.5L/school. Treat ₹6L/yr as a floor |
 | ~250 students in Grades 10–12 per school | Schools are smaller than assumed | Schools-needed roughly doubles at 125/school. **Verify against a real school before committing to a price** |
 | Schools will pay for a point solution | They only buy bundles | Whole GTM changes; partner or be a feature |
 | Founders on ₹60k/month | Anyone needs market salary | Fixed cost roughly triples; break-even goes to ~25 schools |
@@ -418,7 +438,7 @@ document has now twice recommended one. That is the specific error to avoid repe
 | ~~**CQ-04**~~ | ~~Real `$/session`~~ | ✅ Closed — $0.015 modelled on verified pricing |
 | ~~**CQ-05**~~ | ~~Re-price against `flash-lite-latest`~~ | ✅ **Closed 2026-09-16.** $0.30/$2.50 verified |
 | ~~**CQ-06**~~ | ~~Safeguarding on-call cost missing~~ | ✅ **Closed 2026-09-16.** §3.1 |
-| **CQ-07** | **What does a trained part-time safeguarding reviewer actually cost in Hyderabad?** `A-028` is modelled, not quoted | CEO — ask one counsellor |
+| ~~**CQ-07**~~ | ~~Reviewer cost in Hyderabad~~ | ✅ **Closed 2026-09-16.** ₹12–40k/month advertised; `A-028` holds. **Floor, not ceiling** — 24×7 carries a premium |
 | **CQ-08** | Re-check token pricing **before 1 Jan 2027** — Gemini Flash tiers have announced increases effective that date | CTO |
 
 ---

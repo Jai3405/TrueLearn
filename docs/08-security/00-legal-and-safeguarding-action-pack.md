@@ -67,7 +67,7 @@ the sentence to reread.
 | DSC (2 directors) | ₹2,000–3,000 | |
 | Name reservation (SPICe+ Part A) | ₹1,000 | |
 | SPICe+ filing, PAN, TAN, EPFO, ESIC | ₹0–2,000 | Government fee nil below ₹15 lakh authorised capital |
-| **Telangana stamp duty** | **₹500 MOA + 0.15% AOA (min ₹1,000) + ₹20** | ⚠️ **`A-016` UNVERIFIED** — MCA fee page returned 403. Confirm with the CA before filing |
+| **Telangana stamp duty** | **₹1,520** at ₹1L authorised capital | ✅ **`A-016` confirmed 2026-09-16**: ₹500 MOA + 0.15% AOA (min ₹1,000) + ₹20 eForm. MCA filing fees **nil below ₹15L** capital |
 | Professional / CA fees | ₹6,000–15,000 | The real variable |
 | **Total to incorporate** | **₹10,000–22,000 — budget ₹15,000** | ~**3 calendar weeks** |
 
@@ -346,7 +346,7 @@ will protect us in court: we'd be the first to be tested.
 
 | ID | Assumption | Confidence | How to kill it |
 |---|---|---|---|
-| `A-016` | Telangana stamp duty ₹500 MOA + 0.15% AOA + ₹20 | **Low** — MCA page 403'd | CA confirms at filing |
+| ~~`A-016`~~ | Telangana stamp duty ₹500 MOA + 0.15% AOA (min ₹1,000) + ₹20 | ✅ **CONFIRMED 2026-09-16** across two secondary sources. ₹1,520 at ₹1L capital; MCA fees nil below ₹15L | CA still confirms at filing |
 | `A-017` | DPB unstaffed → low near-term enforcement | Medium | Gazette watch; do not rely |
 | `A-018` | A material share of TG/AP target schools are state-board, not CBSE, so have no mandated counsellor | Medium | Ask each school at onboarding |
 | `A-019` | Detector fires on ~1% of sessions | **Unmeasured — a guess** | Measure in `SPK-4`. Drives the hiring cliff |
