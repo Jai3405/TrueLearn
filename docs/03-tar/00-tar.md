@@ -39,7 +39,7 @@ Five constraints, all measured or decided, not assumed:
 
 | Constraint | Value | Source |
 |---|---|---|
-| Revenue ceiling | **₹750/student/year (~$8.52)** | `09-ops/00-cost-model.md` §5 |
+| Revenue ceiling | **₹1,000/student/year (~$11.36)** — revised 2026-09-16 from ₹750 | `09-ops/00-cost-model.md` §5 |
 | Engineering capacity | **One person**, zero budget | `A-018`, `GD-09` |
 | Leakage requirement | **<5%**; achieved 0% with v2 + guard | `07-quality/00-spk1-results.md` |
 | Transcription accuracy | **87.5%** — requires `FR-026` confirmation | `07-quality/01-pq1-results.md` |
@@ -326,7 +326,7 @@ where the original design would have inverted the unit economics on its own.
 | `TQ-01` | Does the pilot school run Google Workspace? | §2.6 — roster vs SSO |
 | `TQ-02` | Does the silent-correction failure mode exist — does the model fix a student's error? | `FR-002`'s untested half |
 | `TQ-03` | Which provider, at what committed rate limit, for 50k+? | §4 capacity |
-| `CQ-05` | Re-price the cost model against `flash-lite-latest` | `09-ops/` |
+| ~~`CQ-05`~~ | ~~Re-price against `flash-lite-latest`~~ | ✅ **Closed 2026-09-16** — $0.30/$2.50 verified; session cost 3× to $0.015 |
 
 ---
 

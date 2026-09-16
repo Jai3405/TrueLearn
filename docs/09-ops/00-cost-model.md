@@ -2,8 +2,8 @@
 title: Unit Economics and Pricing Model
 status: draft — DECISION REQUIRED (GD-12)
 owner: CTO (incoming)
-version: 0.1.0
-last_updated: 2026-09-08
+version: 0.2.0
+last_updated: 2026-09-16
 reviewers: [Aakash Dyavanapally (CEO), Pranav Chaitanya Varma (COO)]
 phase: 8 — pulled forward, because GD-12 blocks pricing
 ---
@@ -20,25 +20,25 @@ phase: 8 — pulled forward, because GD-12 blocks pricing
 
 **FX assumption:** ₹88 = US$1. Not independently verified — treat INR figures as ±10%.
 
-> ### ⚠️ Correction pending — the modelled inference price is for a model you cannot use
+> ### ✅ `CQ-05` closed 2026-09-16 — re-priced, and one conclusion did not survive
 >
-> This document prices LLM inference at **$0.10/$0.40 per 1M tokens (Gemini 2.5
-> Flash-Lite)**. Verified 2026-09-09 against a real API key: **`gemini-2.5-flash` and
-> `gemini-2.5-flash-lite` return 404 — "no longer available to new users."** A newly
-> created account cannot buy that price.
+> `gemini-flash-lite-latest` currently resolves to **Gemini 3.5 Flash-Lite: $0.30/1M input,
+> $2.50/1M output** ([Google AI pricing](https://ai.google.dev/gemini-api/docs/pricing),
+> retrieved 2026-09-16). Against the modelled $0.10/$0.40 that is **3× input and 6.25×
+> output.**
 >
-> The working substitute is **`gemini-flash-lite-latest`**, which is also the only tier
-> that could be measured reliably in `PQ-01` (87.5%; the 3.5 and 3.8 tiers were
-> rate-limited to the point of being unmeasurable).
+> **What survived:** at ₹750+ variable cost is still not the constraint, and the
+> school-count arithmetic still drives the pricing decision.
 >
-> **What this does and does not change.** §2's conclusion is unaffected: even at 10×
-> the modelled token price, gross margin at ₹750/student/year stays above 90% — variable
-> cost still is not the constraint, and the school-count arithmetic in §3 that drives the
-> pricing recommendation does not move at all. What needs redoing is the **per-session
-> figure** in §1, and `FR-026` (transcription confirmation) adds a round-trip on top.
+> **What did not:** this document previously asserted *"gross margin never goes negative."*
+> **That is now false at ₹150/student/year under heavy engagement** — see §2. It was true
+> at the modelled price and is not true at the real one. I am flagging it rather than
+> quietly restating it, because it is exactly the kind of absolute that gets repeated in a
+> pitch and then found by a diligence partner.
 >
-> **Action:** re-derive §1 against current published `flash-lite-latest` pricing before
-> any of these numbers go in front of an investor. Tracked as `CQ-05`.
+> **Also corrected: `CQ-06`.** `ADR-011` added a mandatory safeguarding on-call function
+> this model did not carry at all. It is ~$6,800/year from school #5, and it moves the
+> price recommendation. See §3.1 and §5.
 
 ---
 
@@ -51,31 +51,43 @@ Assume a representative session: 2 photographs, 8 dialogue turns, ~500 output to
 
 | Component | Basis | Cost/session |
 |---|---|---|
-| LLM input (images + growing dialogue context) | ~25k tokens @ $0.10/1M | $0.0025 |
-| LLM output | ~500 tokens @ $0.40/1M | $0.0002 |
+| LLM input (images + growing dialogue context) | ~25k tokens @ **$0.30/1M** | $0.0075 |
+| LLM output | ~500 tokens @ **$2.50/1M** | $0.0013 |
+| `FR-026` confirmation round-trip | Added after `PQ-01` | ~$0.0010 |
 | ASR | Device-native (Web Speech API) | **$0.0000** |
 | TTS | Device-native | **$0.0000** |
 | OCR | Rides the multimodal LLM, not a metered service | $0.0000 |
 | Image storage + egress | ~400 KB, 30-day retention | ~$0.0001 |
 | Serverless compute | Per invocation | ~$0.0002 |
-| **Subtotal** | | **~$0.003** |
-| **Budgeted with headroom** | retries, failed OCR, long sessions | **$0.005** |
+| **Subtotal** | | **~$0.010** |
+| **Budgeted with headroom** | retries, failed OCR, long sessions | **$0.015** |
 
-**All subsequent figures use $0.005/session**, which is roughly 65% padding on the
-modelled cost. If reality comes in at $0.003 the conclusions get stronger, not weaker.
+**All subsequent figures use $0.015/session — 3× the previous $0.005.**
+
+> **The safeguarding screen is not in this table, and it must not be a second LLM call.**
+> `ADR-011` runs it on **every** student turn. At ~$0.002/turn × 8 turns that is
+> **$0.016/session — it would more than double session cost to catch under 1% of turns.**
+>
+> So the rules-first floor in `ADR-011`'s open question is not a stylistic preference, it
+> is an economic requirement: **cheap deterministic rules on 100% of turns, model
+> escalation only on suspicion.** `SPK-4` measures whether the rules floor holds.
 
 ### What the rejected architecture would have cost
 
-| Architecture | Cost/session | vs $0.005 |
+| Architecture | Cost/session | vs $0.015 |
 |---|---|---|
-| **Decided** (photo, push-to-talk, native speech) | $0.005 | 1× |
-| With vendor TTS (Deepgram Aura-1) | $0.035 | 7× |
-| With full-duplex speech-to-speech | $0.051 | 10× |
-| **With a photoreal avatar** (20 min @ $0.30/min) | **$6.005** | **1,200×** |
+| **Decided** (photo, push-to-talk, native speech) | $0.015 | 1× |
+| With vendor TTS (Deepgram Aura-1) | $0.045 | 3× |
+| With full-duplex speech-to-speech | $0.061 | 4× |
+| **With a photoreal avatar** (20 min @ $0.30/min) | **$6.015** | **400×** |
 
-The avatar line is the whole story. At ₹300/student/year, **a single avatar session
-costs nearly twice a student's entire annual subscription.** `GD-01` was not a
-preference — it was the difference between a business and an arithmetic error.
+The avatar line is still the whole story. At ₹300/student/year, **a single avatar session
+costs nearly twice a student's entire annual subscription.** `GD-01` was not a preference —
+it was the difference between a business and an arithmetic error.
+
+**Note the multiples compressed** (1,200× → 400×) purely because the base got more
+expensive. The avatar did not get cheaper; our floor rose. Do not read the smaller multiple
+as the gap closing.
 
 ---
 
@@ -83,26 +95,32 @@ preference — it was the difference between a business and an arithmetic error.
 
 Cost is driven by **active** students; revenue is driven by **enrolled** seats. So:
 
-> Cost per enrolled student/year = WAU% × sessions/week × 30 weeks × $0.005
+> Cost per enrolled student/year = WAU% × sessions/week × 30 weeks × $0.015
 
 | Weekly active | 2 sessions/wk | 4 sessions/wk |
 |---|---|---|
-| 5% | $0.015 | $0.030 |
-| 20% | $0.060 | $0.120 |
-| 50% | $0.150 | $0.300 |
-| 100% | $0.300 | $0.600 |
+| 5% | $0.045 | $0.090 |
+| 20% | $0.180 | $0.360 |
+| 50% | $0.450 | $0.900 |
+| 100% | $0.900 | **$1.800** |
 
-Gross margin at three candidate prices:
+Gross margin at four candidate prices:
 
 | Price/student/yr | 5% WAU | 20% WAU | 50% WAU | 100% WAU, 4/wk |
 |---|---|---|---|---|
-| ₹150 ($1.70) | 99.1% | 96.5% | 91.2% | **64.7%** |
-| ₹300 ($3.41) | 99.6% | 98.2% | 95.6% | **82.4%** |
-| ₹600 ($6.82) | 99.8% | 99.1% | 97.8% | **91.2%** |
+| ₹150 ($1.70) | 97.4% | 89.4% | 73.5% | **−5.9%** |
+| ₹300 ($3.41) | 98.7% | 94.7% | 86.8% | **47.2%** |
+| ₹750 ($8.52) | 99.5% | 97.9% | 94.7% | **78.9%** |
+| ₹1,000 ($11.36) | 99.6% | 98.4% | 96.0% | **84.2%** |
 
-**Gross margin never goes negative.** To lose money on inference at ₹150/student you
-would need ~340 sessions per enrolled student per year — eleven a week, every week,
-from every single student. It cannot happen.
+**Correction to the previous version: gross margin *can* go negative.** At ₹150/student
+with every student active four times a week, inference costs **$1.80 against $1.70 of
+revenue.** The old claim that it "never goes negative" was an artefact of the $0.005
+assumption.
+
+**This is an argument against discounting, not against the business.** At ₹750 the worst
+case is still 78.9%. But the floor is no longer infinitely forgiving, and anyone tempted to
+win a school at ₹150 should know they would be paying for that school's heaviest users.
 
 Two consequences worth stating plainly:
 
@@ -126,27 +144,54 @@ Since variable cost is negligible, break-even is entirely about covering fixed c
 |---|---|---|
 | Curriculum / axiom graph authoring | Maths SME, part-time 6 months @ ₹40k/mo | ~$2,700 |
 | Founder subsistence (two, Hyderabad) | ₹60k/mo each | ~$16,400 |
-| Entity formation + annual compliance | `FD-06` | ~$700 |
+| Entity formation + annual compliance | `FD-06` — **verified**: ₹15k once + ₹30–45k/yr | ~$700 |
 | Baseline hosting, domain, tooling | | ~$400 |
-| **Total** | | **~$20,200** |
+| **CERT-In log retention** | 180 days, stored in India. **New — not optional** | ~$200 |
+| **Lawyer opinion** | `FD-04` reopened, one-time ₹40–80k | ~$680 |
+| **Subtotal, schools 1–4** | | **~$21,080** |
+| **Safeguarding reviewers** | **From school #5.** 2 part-time @ ₹25k/mo (`A-028`) | **~$6,818** |
+| **Total, schools 5+** | | **~$27,900** |
+
+### 3.1 `CQ-06` — the step function the model was missing
+
+**`ADR-011` makes safeguarding review a staffed function, not a founder side-duty.** Action
+pack §3.5 models the founders' own pager as viable to ~3 schools and **breaking at ~5**.
+
+So fixed cost is not smooth. It steps:
+
+```mermaid
+flowchart LR
+    A["Schools 1-4<br/>$21,080/yr<br/>founders carry the pager"] -->|"school #5"| B["Schools 5+<br/>$27,900/yr<br/>+$6,818 reviewers"]
+```
 
 **Seats needed to break even:**
 
-| Price/student/yr | Seats to cover $20.2k | Schools needed* |
-|---|---|---|
-| ₹150 ($1.70) | 11,880 | **48** |
-| ₹300 ($3.41) | 5,920 | **24** |
-| ₹600 ($6.82) | 2,960 | **12** |
-| ₹750 ($8.52) | 2,370 | **9** |
-| ₹1,000 ($11.36) | 1,780 | **7** |
+| Price/student/yr | Seats @ $21.1k | Schools* | Seats @ $27.9k | **Schools with reviewers*** |
+|---|---|---|---|---|
+| ₹150 ($1.70) | 12,400 | 50 | 16,410 | **66** |
+| ₹300 ($3.41) | 6,180 | 25 | 8,180 | **33** |
+| ₹750 ($8.52) | 2,474 | 10 | 3,274 | **13** |
+| ₹1,000 ($11.36) | 1,855 | 8 | 2,456 | **10** |
 
-\* Assuming ~250 students across Grades 10–12 in a mid-size private school. Note this
-is *not* total school enrolment — a 1,200-student school has roughly 250 in the target
-grades, which is the number that matters and is easy to get wrong.
+\* ~250 students across Grades 10–12 in a mid-size private school. Note this is *not* total
+enrolment — a 1,200-student school has roughly 250 in the target grades, which is the
+number that matters and is easy to get wrong.
 
-**This table is the actual pricing decision.** 48 schools is not a thing two founders
-sign in year one. 7–12 is, given existing family relationships. The price has to be set
-by the sales motion you can actually execute, not by what feels affordable.
+**Read the last column, not the fourth.** You cannot reach 13 schools without passing
+school #5, so the reviewer cost is unavoidable on any path to break-even. **The
+safeguarding function adds ~3 schools to break-even at ₹750.**
+
+Put another way: at ₹750 a school brings $2,130/year, so **the reviewer hire consumes
+3.2 schools of revenue.** Schools 5, 6 and 7 exist to pay for safeguarding.
+
+**`SPK-4` has a dollar value.** The cliff is set by detector false-positive rate, not by
+disclosure prevalence. Halving false positives roughly doubles the schools two founders can
+cover — **pushing the hire from school #5 to school #10, worth ~$6,800/year deferred.** That
+is why detector precision is a commercial metric and not merely a quality one.
+
+**This table is the actual pricing decision.** 66 schools is not a thing two founders sign
+in year one. 10–13 is, given existing family relationships. The price has to be set by the
+sales motion you can execute, not by what feels affordable.
 
 ---
 
@@ -187,16 +232,29 @@ offered to a school, and it should not appear in any pitch until it has been.
 
 ## 5. Recommendation
 
-> **₹750 per student per year (~$8.52), Grades 10–12 maths, school-contracted,
-> parent-funded through the school's fee schedule.**
+> **Revised 2026-09-16: ₹1,000 per student per year (~$11.36)**, Grades 10–12 maths,
+> school-contracted, parent-funded through the school's fee schedule.
 
-| | |
-|---|---|
-| Break-even | ~2,370 seats ≈ **9 schools** |
-| Gross margin at 50% WAU | **97.8%** |
-| Gross margin at 100% WAU, 4 sessions/wk | **91.2%** |
-| Share of annual tuition | 2.4% |
-| vs what parents already pay Photomath | 12% |
+**Previously ₹750. The change is not a re-think — it is new cost.** `ADR-011` added a
+~$6,800/year safeguarding function that did not exist when ₹750 was derived, and the
+verified token price is 3× the modelled one. Holding ₹750 would push break-even to **13
+schools**; ₹1,000 brings it back to **10**, inside the 7–12 band the original analysis
+established as signable by two founders.
+
+| | ₹750 | **₹1,000** |
+|---|---|---|
+| Break-even (with reviewers) | 13 schools | **10 schools** |
+| Gross margin at 50% WAU | 94.7% | **96.0%** |
+| Gross margin at 100% WAU, 4/wk | 78.9% | **84.2%** |
+| Share of annual tuition | 2.4% | **3.1%** |
+| vs what parents already pay Photomath | 12% | **16%** |
+
+**Why this is defensible rather than opportunistic:** ₹1,000 is still **3.1% of annual
+tuition** and still **one-sixth** of what a parent already pays Photomath for an answer
+machine. And the thing the extra ₹250 buys is real and nameable — **a staffed safeguarding
+function no Indian edtech currently publishes** (action pack §3.7). It is the rare case
+where the cost driver is also the differentiator, and it should be sold that way rather than
+buried in a line item.
 
 **Pilot pricing: free for the first three schools**, in exchange for the baseline
 diagnostic (`FR-017`), termly outcome measurement, and a reference. The evidence asset is
@@ -213,8 +271,10 @@ the buyer talks to other schools.
 
 | Assumption | Breaks if | Consequence |
 |---|---|---|
-| ~$0.005/session | `PQ-01` fails and OCR needs a metered service (Mathpix) or multiple retries per turn | Costs rise 3–10×. Still profitable, but the margin cushion goes |
-| Device-native speech is acceptable | `PQ-03` shows students reject robotic TTS | Vendor TTS at $0.030/session ≈ 7× cost. Still >80% margin at ₹750, but it changes the LLM budget |
+| ~$0.015/session | `PQ-01` fails and OCR needs a metered service (Mathpix) or multiple retries per turn | Costs rise 3–10×. Still profitable at ₹1,000, but the cushion goes |
+| Device-native speech is acceptable | `PQ-03` shows students reject robotic TTS | Vendor TTS adds $0.030/session ≈ 3× cost. Still >70% margin at ₹1,000, but it changes the LLM budget |
+| **The safeguarding screen stays rules-first** | It becomes a per-turn LLM call | **Session cost more than doubles** (§1). This is a design constraint, not a preference |
+| **Reviewers cost ₹25k/mo part-time** (`A-028`) | Trained counsellors cost 2× that in Hyderabad | Break-even at ₹1,000 moves from 10 schools to ~13. **`CQ-07` — ask one counsellor** |
 | ~250 students in Grades 10–12 per school | Schools are smaller than assumed | Schools-needed roughly doubles at 125/school. **Verify against a real school before committing to a price** |
 | Schools will pay for a point solution | They only buy bundles | Whole GTM changes; partner or be a feature |
 | Founders on ₹60k/month | Anyone needs market salary | Fixed cost roughly triples; break-even goes to ~25 schools |
@@ -242,8 +302,12 @@ the buyer talks to other schools.
 |---|---|---|
 | **CQ-01** | Typical Grades 10–12 cohort size — refine the range above as real schools appear. Not blocking | CEO, opportunistic |
 | **CQ-02** | Will a school add a line to its fee schedule for a third-party tool, or must it come from an existing budget? Determines whether §4's structure exists | CEO |
-| **CQ-03** | Does the school-collected parent contribution hold up under DPDP as described? | Needs review before it is offered |
-| **CQ-04** | Real `$/session` once `PQ-01` and `SPK-1` have run | CTO |
+| **CQ-03** | Does the school-collected parent contribution hold up under DPDP as described? **Fold into lawyer Q2** | Needs review before it is offered |
+| ~~**CQ-04**~~ | ~~Real `$/session`~~ | ✅ Closed — $0.015 modelled on verified pricing |
+| ~~**CQ-05**~~ | ~~Re-price against `flash-lite-latest`~~ | ✅ **Closed 2026-09-16.** $0.30/$2.50 verified |
+| ~~**CQ-06**~~ | ~~Safeguarding on-call cost missing~~ | ✅ **Closed 2026-09-16.** §3.1 |
+| **CQ-07** | **What does a trained part-time safeguarding reviewer actually cost in Hyderabad?** `A-028` is modelled, not quoted | CEO — ask one counsellor |
+| **CQ-08** | Re-check token pricing **before 1 Jan 2027** — Gemini Flash tiers have announced increases effective that date | CTO |
 
 ---
 
@@ -252,6 +316,7 @@ the buyer talks to other schools.
 | Version | Date | Author | Change |
 |---------|------|--------|--------|
 | 0.1.0 | 2026-09-08 | CTO (incoming) | Bottom-up model. Finds variable cost is not the constraint; recommends ₹750/student/year on a school-count basis. |
+| 0.2.0 | 2026-09-16 | CTO (incoming) | **`CQ-05` and `CQ-06` closed.** Re-priced on verified Gemini 3.5 Flash-Lite ($0.30/$2.50) — session cost 3× to $0.015, and **"margin never goes negative" is withdrawn**: ₹150 is −5.9% at heavy usage. Adds the `ADR-011` safeguarding step function (~$6,800/yr from school #5), CERT-In log retention, and the lawyer opinion. **Price recommendation revised ₹750 → ₹1,000** to hold break-even at 10 schools. Adds `A-028`, `CQ-07`, `CQ-08`. |
 
 ## Related documents
 

@@ -43,7 +43,7 @@ contradict each other in nine recorded places.
 | 5 · Implementation | [`06-implementation/`](06-implementation/) | ✅ **Delivered** — 7 slices, 5 milestones | **Gate passed 2026-09-16** — `GD-14`–`GD-17` |
 | 6 · Quality & Eval | [`07-quality/`](07-quality/) | ✅ **Delivered** — strategy + 2 harnesses measuring | Approve the release gates — [`02-test-and-eval-strategy.md`](07-quality/02-test-and-eval-strategy.md) §2 |
 | 7 · Security & Compliance | [`08-security/`](08-security/) | **Pulled forward — delivered** | Closes `FD-06`, `ADR-009`, `ADR-011` |
-| 8 · Ops & Cost | [`09-ops/`](09-ops/) | Partial — cost model exists | ⚠️ Missing the safeguarding on-call cost |
+| 8 · Ops & Cost | [`09-ops/`](09-ops/) | ✅ **Delivered** — cost model v0.2.0 + SLOs | **Approve the price change: ₹750 → ₹1,000** (`GD-12`) |
 | 9 · GTM & Diligence | [`10-gtm/`](10-gtm/) | Not started | — |
 
 **Phase 7 was pulled forward** because three of its findings were blocking earlier phases —
