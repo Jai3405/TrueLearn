@@ -57,13 +57,14 @@ Assume a representative session: 2 photographs, 8 dialogue turns, ~500 output to
 | LLM input (images + growing dialogue context) | ~25k tokens @ **$0.30/1M** | $0.0075 |
 | LLM output | ~500 tokens @ **$2.50/1M** | $0.0013 |
 | `FR-026` confirmation round-trip | Added after `PQ-01` | ~$0.0010 |
+| **Guard answer derivation** | **TAR §2.2 option C, promoted to v0 2026-09-16.** Once per *problem*, not per turn | ~$0.0020 |
 | ASR | Device-native (Web Speech API) | **$0.0000** |
 | TTS | Device-native | **$0.0000** |
 | OCR | Rides the multimodal LLM, not a metered service | $0.0000 |
 | Image storage + egress | ~400 KB, 30-day retention | ~$0.0001 |
 | Serverless compute | Per invocation | ~$0.0002 |
-| **Subtotal** | | **~$0.010** |
-| **Budgeted with headroom** | retries, failed OCR, long sessions | **$0.015** |
+| **Subtotal** | | **~$0.012** |
+| **Budgeted with headroom** | retries, failed OCR, long sessions | **$0.017** |
 
 **All subsequent figures use $0.015/session — 3× the previous $0.005.**
 
