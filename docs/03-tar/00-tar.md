@@ -39,7 +39,7 @@ Five constraints, all measured or decided, not assumed:
 
 | Constraint | Value | Source |
 |---|---|---|
-| Revenue ceiling | **₹1,000/student/year (~$11.36)** — revised 2026-09-16 from ₹750 | `09-ops/00-cost-model.md` §5 |
+| Revenue ceiling | **₹1,50,000/school + ₹2,000/student/year ≈ ₹6.5L/school** — restructured 2026-09-16 | `09-ops/00-cost-model.md` §5 |
 | Engineering capacity | **One person**, zero budget | `A-018`, `GD-09` |
 | Leakage requirement | **<5%**; achieved 0% with v2 + guard | `07-quality/00-spk1-results.md` |
 | Transcription accuracy | **87.5%** — requires `FR-026` confirmation | `07-quality/01-pq1-results.md` |
@@ -74,7 +74,7 @@ board should see what was rejected.
 | C. Self-hosted OCR model | 1 | 2 | 5 | 5 | 3 | 5 | 2.70 |
 
 **Recommend A.** Measured at 87.5% (`PQ-01`), needs no second vendor, no model hosting and
-no separate bill. B adds a metered per-page cost against a ₹750/year ceiling and a second
+no separate bill. B adds a metered per-page cost against a thin per-student margin and a second
 failure domain, for a quality gain nobody has demonstrated. C is a research project.
 
 **What would make this wrong:** if `FR-026` confirmation proves too annoying in user testing
