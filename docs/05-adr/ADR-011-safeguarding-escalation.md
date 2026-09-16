@@ -127,9 +127,19 @@ before one real student uses the product. Slice 4 in the implementation order.
 
 ## Open — non-blocking
 
-- **Detector: rules, model, or both?** Probably both, rules as the floor, since a
-  model-based detector can itself fail empty (`ADR-015`). Measure precision/recall in
-  **`SPK-4`** — it drives the hiring cliff.
+- ~~**Detector: rules, model, or both?**~~ ✅ **Resolved 2026-09-16 by `SPK-4`, against the
+  assumption this ADR was written on.** "Rules as the floor" is disproven: precise rules
+  scored 76/76 on the corpus they were fitted to and **missed 18 of 18 disclosures on
+  held-out phrasing.** Rules do not classify.
+
+  **Corrected architecture: rules *triage*, a model *classifies*.** The rules layer asks
+  "is this anything other than a maths turn?" rather than "is this a disclosure?" — an
+  easier and more robust discrimination that degrades safely, and which measured **100%
+  recall on held-out language**. Everything it catches goes to a model classifier.
+  See [`../07-quality/03-spk4-results.md`](../07-quality/03-spk4-results.md).
+- **`A-019` remains open.** `SPK-4` measured the *escalation* rate, not the *flag* rate; the
+  two are separated by a classifier that does not exist yet. **The rota cannot be sized
+  until it is built.**
 - Ring-test all helplines before launch, re-test quarterly.
 
 ## Related

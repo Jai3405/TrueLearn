@@ -40,16 +40,19 @@ in this document, and it is why the totals below look slow against the raw day c
 
 | | Engineer-days |
 |---|---|
-| Seven slices | 50 |
+| Seven slices | 53 |
 | Platform: auth, deploy, CI, object store, observability | 8 |
 | Admin console | 5 |
-| Contingency (+25%) | 16 |
-| **Total** | **~79 engineer-days** |
+| Contingency (+25%) | 17 |
+| **Total** | **~83 engineer-days** |
 
-At 3.5 focused days/week: **~22 calendar weeks. Start 2026-09-21 → pilot-ready
-~2027-02-19.**
+At 3.5 focused days/week: **~24 calendar weeks. Start 2026-09-21 → build-complete
+~2027-03-08.**
 
-**That date is a problem, and §6 is about fixing it rather than hiding it.**
+> **Revised 2026-09-16 (+4 days).** `SPK-4` showed rules cannot classify disclosures, so
+> slice 4 gains a model classifier (10 → 13 days). **This is what the buffer was for** — the
+> pilot start is June 2027 (§6), so a three-week slip is absorbed rather than escalated.
+> That is the first real test of keeping full scope, and it held.
 
 ---
 
@@ -119,8 +122,12 @@ immutable audit log, consent gate, roster CSV.
 - `safeguarding_events` rejects `UPDATE` and `DELETE`.
 - Helpline resources render in **Telugu and English** and are tappable, including the
   Vandrevala **WhatsApp** path.
-- **`SPK-4`:** detector precision/recall measured on a synthetic disclosure corpus. Not a
-  pass/fail gate — an input to `FD-09` rota sizing, per action pack §3.5.
+- **`SPK-4` triage net: 100% recall on held-out disclosures**, already measured. This is a
+  **merge gate** — a rules change that drops held-out recall below 100% is rejected.
+- **The model classifier holds 0 misroutes** on escalated turns. Not yet built; extend
+  `spk4_safeguard.py` when it is.
+- **Escalation rate instrumented from day one** (`A-035`) — it decides whether the triage
+  net is a cost lever at all, and it is currently unmeasured on real traffic.
 
 **Blocked by `FD-08` and `FD-09`.** The code can be built without them; it cannot be
 *deployed* without a named DCPO, because there would be nowhere for a Tier 3 to go.
@@ -151,7 +158,7 @@ nothing and cannot be renewed on evidence rather than goodwill.
 | 1 | Schema + RLS | 5 | Cross-tenant read test green in CI |
 | 2 | Capture → transcribe → confirm | 8 | ≥85% on held-out set; student can correct a misread line |
 | 3 | Policy engine + guard | **12** | <5% leakage on 36 attacks; step-down ceiling at L3 |
-| 4 | Safeguarding + `SupportMode` | **10** | Tier routing tests green, incl. the parent-implicated case |
+| 4 | Safeguarding + `SupportMode` + **model classifier** (`SPK-4`) | **13** | Tier routing tests green, incl. the parent-implicated case. Rules triage only -- they do not classify |
 | 5 | Consent gate + roster | 6 | No session without consent, enforced twice |
 | 6 | Cohort aggregator | 4 | k≥5 enforced by the DB; individual signal provably discarded |
 | 7 | Baseline diagnostic | 5 | Captured before first tutoring turn |

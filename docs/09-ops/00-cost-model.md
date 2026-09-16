@@ -71,9 +71,24 @@ Assume a representative session: 2 photographs, 8 dialogue turns, ~500 output to
 > `ADR-011` runs it on **every** student turn. At ~$0.002/turn × 8 turns that is
 > **$0.016/session — it would more than double session cost to catch under 1% of turns.**
 >
-> So the rules-first floor in `ADR-011`'s open question is not a stylistic preference, it
-> is an economic requirement: **cheap deterministic rules on 100% of turns, model
-> escalation only on suspicion.** `SPK-4` measures whether the rules floor holds.
+> So the rules-first floor in `ADR-011` is not a stylistic preference, it is an economic
+> requirement: **cheap deterministic rules on 100% of turns, model escalation only on
+> suspicion.**
+>
+> ### ⚠️ Qualified 2026-09-16 by `SPK-4` — the saving may be near zero
+>
+> `SPK-4` found that **precise rules cannot classify** (0 of 18 held-out disclosures
+> detected), so the architecture is now **rules triage, model classifies**. Cost therefore
+> scales with the **escalation rate**, not with rules alone.
+>
+> Measured escalation on the (adversarial) test corpora was **74–88%**, which costs
+> **$0.011–0.014/session against $0.016 for a model on every turn — almost no saving.**
+>
+> Those corpora are ~45% disclosures by construction and are **not representative**: real
+> turns are mostly pure maths, which never escalates. **If production is 90% maths,
+> escalation lands near 10–15% and costs ~$0.002/session.** That is `A-035`, and it is
+> unmeasured. **Instrument escalation rate from day one of the pilot** — it decides whether
+> triage is a cost lever at all. See [`../07-quality/03-spk4-results.md`](../07-quality/03-spk4-results.md).
 
 ### What the rejected architecture would have cost
 

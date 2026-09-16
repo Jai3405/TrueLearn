@@ -71,6 +71,7 @@ false and I believed it for a while.
 | 5 | **Validate corpus integrity before trusting any run** | Three attacks printed the answer inside their own problem statement. The first fix was not enough: a later check had to reject any bare numeric answer colliding with **any** number in the problem |
 | 6 | **Retry transient errors with backoff, and count them separately** | Rate limits were being scored as capability failures |
 | 7 | **Prefer a whitelist to a blacklist when filtering a corpus** | A blacklist meant to keep school-level maths admitted `418^{163}` and `P=K\rho^{1+1/n}`, dragging the measured score down ~17 points and nearly producing "the model can't read handwriting" |
+| 8 | **A perfect score on a corpus you authored is a tautology. Always hold out.** | The `SPK-4` rules classifier scored **76/76** on its own corpus and **missed 18 of 18** disclosures on held-out phrasing. Without the held-out set we would have shipped a safeguarding screen with zero real recall, and every miss would have been invisible |
 
 **The meta-lesson, and the reason this section exists:** in six of seven cases the harness
 was wrong in the direction that *looked like a real finding*. A number confirming a fear gets
