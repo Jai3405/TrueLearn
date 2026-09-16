@@ -83,7 +83,7 @@ safeguarding research. `FD-08` and `FD-09` block launch.
 | FD-02 | Which market the first pilots run in | CEO | ✅ **Decided: Telangana / Andhra Pradesh** (`O-04`). Inverts `A-013` |
 | FD-03 | Whether both founders go full-time | Both | ✅ **Resolved** — both already full-time (`O-03`) |
 | **FD-04** | Budget for external counsel on children's data | CEO | ⚠️ **REOPENED 2026-09-16.** Previously declined on zero budget. Two questions now carry **criminal** (POCSO §19 machine-knowledge) and **₹200 crore** (DPDP §9) exposure that no amount of statute-reading resolves. **₹40–80k.** Action pack §7 |
-| FD-05 | Whether the claims-audit rewrites are adopted | CEO | 🔲 **Still open** — phase 9 |
+| FD-05 | Whether the claims-audit rewrites are adopted | CEO | ✅ **Decided 2026-09-16: all rewrites adopted.** Deck and site edits listed in `10-gtm/00-diligence-pack.md` §3. ⚠️ Audit §6 predates the India pivot — market sizing must be rebuilt, not adapted |
 | **FD-06** | **Legal entity formation** | CEO | ✅ **Decided 2026-09-16: Private Limited, Telangana.** ₹15k to incorporate, ~3 weeks; **₹30–45k/yr recurring because statutory audit is mandatory at zero revenue.** Execution now, not a decision. Action pack §1 |
 | **FD-07** | **Primary device for v0** | CEO | ✅ **Closed 2026-09-16 (`GD-16`): mobile-web-first.** The phone is the constrained case, so the device answer stops being load-bearing |
 | **FD-08** | **Who is DCPO, and who is Deputy?** | Both | ✅ **Decided 2026-09-16 (`GD-14`): the non-technical founder is DCPO, the technical founder Deputy.** Protects the critical path, and the DCPO already knows the school's people by name. **Both names must be published before launch** |

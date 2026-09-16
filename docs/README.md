@@ -44,7 +44,7 @@ contradict each other in nine recorded places.
 | 6 · Quality & Eval | [`07-quality/`](07-quality/) | ✅ **Delivered** — strategy + 2 harnesses measuring | Approve the release gates — [`02-test-and-eval-strategy.md`](07-quality/02-test-and-eval-strategy.md) §2 |
 | 7 · Security & Compliance | [`08-security/`](08-security/) | **Pulled forward — delivered** | Closes `FD-06`, `ADR-009`, `ADR-011` |
 | 8 · Ops & Cost | [`09-ops/`](09-ops/) | ✅ **Delivered** — cost model v0.3.0 + SLOs | **Approve the pricing restructure** (`GD-12`) — break-even 10 schools → 3 |
-| 9 · GTM & Diligence | [`10-gtm/`](10-gtm/) | Not started | — |
+| 9 · GTM & Diligence | [`10-gtm/`](10-gtm/) | ✅ **Delivered** — diligence pack + pilot design | **Approve for external use** — `GQ-02` |
 
 **Phase 7 was pulled forward** because three of its findings were blocking earlier phases —
 and one of them (`ADR-011`) **reversed a decision already baked into the accepted design**.
